@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Trivia Trek</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:system-ui,sans-serif;background:#0f172a;color:#f1f5f9;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:16px}
+.screen{width:100%;max-width:600px}
+h1{font-size:2.2rem;font-weight:800;text-align:center;margin-bottom:8px;background:linear-gradient(135deg,#818cf8,#c084fc);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+h2{font-size:1.3rem;font-weight:700;margin-bottom:16px;text-align:center;color:#e2e8f0}
+.sub{text-align:center;color:#94a3b8;margin-bottom:28px}
+.card{background:#1e293b;border-radius:16px;padding:20px;margin-bottom:14px}
+.btn{display:block;width:100%;padding:12px 18px;border-radius:10px;border:2px solid transparent;font-size:1rem;font-weight:600;cursor:pointer;transition:all .15s;text-align:left;margin-bottom:8px}
+.btn-primary{background:#4f46e5;color:#fff;border-color:#4f46e5}
+.btn-primary:hover{background:#4338ca;border-color:#4338ca}
+.btn-outline{background:transparent;color:#cbd5e1;border-color:#334155}
+.btn-outline:hover{border-color:#818cf8;color:#818cf8}
+.btn-correct{background:#16a34a!important;border-color:#16a34a!important;color:#fff!important}
+.btn-wrong{background:#dc2626!important;border-color:#dc2626!important;color:#fff!important}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+.badge{display:inline-block;padding:3px 10px;border-radius:999px;font-size:.7rem;font-weight:700;text-transform:uppercase}
+.be{background:#14532d;color:#86efac}.bm{background:#713f12;color:#fde68a}.bh{background:#7f1d1d;color:#fca5a5}
+.track{display:flex;gap:3px;flex-wrap:wrap;margin:10px 0}
+.ts{width:26px;height:26px;border-radius:5px;display:flex;align-items:center;justify-content:center;font-size:.65rem;font-weight:700}
+.td{background:#1d4ed8;color:#fff}.tc{background:#818cf8;color:#fff;box-shadow:0 0 6px #818cf8}.tt{background:#dc2626;color:#fff}.te{background:#1e293b;color:#475569}.tg{background:#16a34a;color:#fff}
+.fb{padding:14px;border-radius:10px;margin-bottom:14px;font-weight:600}
+.fb-ok{background:#14532d;color:#86efac;border:1px solid #16a34a}
+.fb-no{background:#7f1d1d;color:#fca5a5;border:1px solid #dc2626}
+.pcard{background:#1e293b;border-radius:10px;padding:14px;margin-bottom:10px}
+.ap{border:2px solid #818cf8}
+.row{display:flex;align-items:center;justify-content:space-between;margin-bottom:4px}
+.muted{color:#64748b;font-size:.82rem}
+label{display:block;font-size:.85rem;color:#94a3b8;margin:10px 0 4px}
+input,select{width:100%;padding:9px 12px;background:#0f172a;border:1px solid #334155;border-radius:8px;color:#f1f5f9;font-size:.95rem;outline:none}
+input:focus,select:focus{border-color:#818cf8}
+.big{font-size:3.5rem;text-align:center;display:block;margin-bottom:12px}
+table{width:100%;border-collapse:collapse}
+td,th{padding:9px 10px;text-align:left}
+tr:nth-child(even){background:#0f172a}
+th{color:#94a3b8;font-size:.72rem;text-transform:uppercase;border-bottom:1px solid #334155}
+.tag{display:inline-block;padding:2px 7px;border-radius:4px;font-size:.68rem;background:#334155;color:#94a3b8;margin-left:4px}
+</style>
+</head>
+<body><div id="app"></div>
+<script>
+const QD=[["What is the capital of France?",["Berlin","Madrid","Paris","Rome"],2,"b","e","g"],["How many sides does a hexagon have?",["5","6","7","8"],1,"l","e","g"],["What colour is the sky on a clear day?",["Green","Blue","Yellow","Purple"],1,"b","e","g"],["Which planet is closest to the Sun?",["Venus","Earth","Mercury","Mars"],2,"l","e","g"],["What is 12 × 12?",["132","144","122","148"],1,"b","e","g"],["What is the chemical symbol for gold?",["Go","Gd","Au","Ag"],2,"t","m","g"],["How many bones are in the adult human body?",["186","206","226","246"],1,"b","m","g"],["Which country invented the game of chess?",["China","Persia","India","Greece"],2,"l","m","g"],["What is the longest river in the world?",["Amazon","Mississippi","Yangtze","Nile"],3,"t","m","g"],["What is the rarest blood type?",["AB negative","O negative","B negative","A negative"],0,"b","h","g"],["How many zeros are in one googol?",["10","100","1,000","1,000,000"],1,"t","h","g"],["What is the speed of light in km/s (approximately)?",["100,000","200,000","300,000","400,000"],2,"l","h","g"],["Who was the first President of the United States?",["John Adams","Thomas Jefferson","George Washington","Benjamin Franklin"],2,"b","e","hi"],["In which year did World War II end?",["1943","1944","1945","1946"],2,"l","e","hi"],["Which ancient wonder was located in Alexandria?",["Colossus of Rhodes","Lighthouse of Alexandria","Hanging Gardens","Statue of Zeus"],1,"b","e","hi"],["The Magna Carta was signed in which year?",["1066","1215","1348","1492"],1,"t","m","hi"],["Which empire was ruled by Genghis Khan?",["Ottoman Empire","Mongol Empire","Roman Empire","Persian Empire"],1,"b","m","hi"],["The Berlin Wall fell in which year?",["1987","1988","1989","1990"],2,"l","m","hi"],["Who painted the Sistine Chapel ceiling?",["Leonardo da Vinci","Raphael","Donatello","Michelangelo"],3,"t","m","hi"],["In which year did India gain independence from Britain?",["1945","1946","1947","1948"],2,"b","h","hi"],["Which Roman emperor converted to Christianity?",["Nero","Augustus","Constantine I","Caligula"],2,"l","h","hi"],["The Battle of Thermopylae was fought between which civilisations?",["Rome vs Carthage","Greece vs Persia","Egypt vs Nubia","Athens vs Sparta"],1,"t","h","hi"],["What year did the Soviet Union officially dissolve?",["1989","1990","1991","1992"],2,"b","h","hi"],["What gas do plants absorb from the air?",["Oxygen","Nitrogen","Carbon Dioxide","Hydrogen"],2,"b","e","sc"],["What is H₂O commonly known as?",["Salt","Water","Oxygen","Hydrogen Peroxide"],1,"l","e","sc"],["How many planets are in our solar system?",["7","8","9","10"],1,"b","e","sc"],["What is the powerhouse of the cell?",["Nucleus","Ribosome","Mitochondria","Golgi Apparatus"],2,"t","m","sc"],["What is the atomic number of carbon?",["4","6","8","12"],1,"b","m","sc"],["Which scientist proposed the theory of general relativity?",["Isaac Newton","Niels Bohr","Albert Einstein","Max Planck"],2,"l","m","sc"],["What is the most abundant gas in Earth's atmosphere?",["Oxygen","Argon","Carbon Dioxide","Nitrogen"],3,"t","m","sc"],["What is the half-life of Carbon-14?",["1,730 years","5,730 years","57,300 years","573 years"],1,"b","h","sc"],["Which subatomic particle has no electric charge?",["Proton","Electron","Neutron","Positron"],2,"l","h","sc"],["DNA is made up of how many strands in a double helix?",["1","2","3","4"],1,"t","h","sc"],["What is the name of the force that keeps electrons in orbit around a nucleus?",["Gravity","Electromagnetic force","Strong nuclear force","Weak nuclear force"],1,"b","h","sc"],["How many players are on a standard football (soccer) team?",["9","10","11","12"],2,"b","e","sp"],["In which sport do you score a \"hat-trick\"?",["Cricket","Football","Rugby","All of these"],3,"l","e","sp"],["How many Grand Slam tennis tournaments are played per year?",["2","3","4","5"],2,"b","e","sp"],["Which country has won the most FIFA World Cups?",["Germany","Italy","Argentina","Brazil"],3,"t","m","sp"],["In cricket, what is the maximum number of runs scored from one ball (excluding extras)?",["4","6","8","10"],1,"b","m","sp"],["Who holds the record for most Olympic gold medals?",["Usain Bolt","Carl Lewis","Michael Phelps","Mark Spitz"],2,"l","m","sp"],["The Ashes cricket series is played between which two countries?",["England vs South Africa","Australia vs New Zealand","England vs Australia","India vs Australia"],2,"t","m","sp"],["How many points is a touchdown worth in American Football?",["5","6","7","8"],1,"b","h","sp"],["At the 2020 Tokyo Olympics, which country topped the medal table?",["China","USA","Great Britain","Japan"],1,"l","h","sp"],["In snooker, what is the maximum break possible?",["147","155","157","161"],0,"t","h","sp"],["Who played Iron Man in the Marvel Cinematic Universe?",["Chris Evans","Robert Downey Jr.","Chris Hemsworth","Mark Ruffalo"],1,"b","e","fi"],["What is the name of the toy cowboy in Toy Story?",["Buzz","Rex","Woody","Hamm"],2,"l","e","fi"],["Which film features the song \"Let It Go\"?",["Tangled","Moana","Frozen","Brave"],2,"b","e","fi"],["Who directed Pulp Fiction?",["Martin Scorsese","Quentin Tarantino","Steven Spielberg","David Fincher"],1,"t","m","fi"],["What is the highest-grossing film of all time (not adjusted for inflation)?",["Titanic","Avengers: Endgame","Avatar","Star Wars: The Force Awakens"],2,"b","m","fi"],["In Breaking Bad, what is Walter White's alias?",["Mr. Green","Heisenberg","The Cook","Blue Sky"],1,"l","m","fi"],["Which actress has won the most Academy Awards for Best Actress?",["Meryl Streep","Katharine Hepburn","Cate Blanchett","Frances McDormand"],1,"t","m","fi"],["Stanley Kubrick directed which 1968 sci-fi masterpiece?",["Solaris","Metropolis","2001: A Space Odyssey","Blade Runner"],2,"b","h","fi"],["Which film won the first Academy Award for Best Picture?",["It Happened One Night","Wings","Gone with the Wind","All Quiet on the Western Front"],1,"l","h","fi"],["In The Godfather, what animal's head is placed in the bed?",["Dog","Bull","Horse","Pig"],2,"t","h","fi"],["What is the largest continent by area?",["Africa","North America","Europe","Asia"],3,"b","e","ge"],["What is the capital of Australia?",["Sydney","Melbourne","Canberra","Brisbane"],2,"l","e","ge"],["Which is the largest ocean on Earth?",["Atlantic","Indian","Arctic","Pacific"],3,"b","e","ge"],["Which country has the longest coastline in the world?",["Russia","USA","Canada","Australia"],2,"t","m","ge"],["What is the smallest country in the world by area?",["Monaco","San Marino","Vatican City","Liechtenstein"],2,"b","m","ge"],["Through how many countries does the Amazon River flow?",["3","5","7","9"],2,"l","m","ge"],["What is the capital of Canada?",["Toronto","Vancouver","Montreal","Ottawa"],3,"t","m","ge"],["What is the tallest mountain in Africa?",["Mount Kenya","Mount Kilimanjaro","Rwenzori","Simien Mountains"],1,"b","h","ge"],["Which country has the most natural lakes?",["Russia","USA","Brazil","Canada"],3,"l","h","ge"],["The Strait of Malacca separates which two landmasses?",["India and Sri Lanka","Malay Peninsula and Sumatra","Java and Borneo","Thailand and Vietnam"],1,"t","h","ge"],["What does \"HTTP\" stand for?",["HyperText Transfer Protocol","High-Tech Transfer Process","HyperText Typing Program","Home Transfer Text Protocol"],0,"b","e","te"],["Which company makes the iPhone?",["Google","Samsung","Apple","Microsoft"],2,"l","e","te"],["What does \"CPU\" stand for?",["Central Processing Unit","Computer Power Unit","Core Processing Utility","Central Power Unit"],0,"b","e","te"],["Who co-founded Apple with Steve Jobs?",["Bill Gates","Steve Wozniak","Jony Ive","Tim Cook"],1,"t","m","te"],["In what year was the first iPhone released?",["2005","2006","2007","2008"],2,"b","m","te"],["What programming language is primarily used for Android development?",["Swift","Python","Kotlin","Ruby"],2,"l","m","te"],["What does \"AI\" stand for in computing?",["Automated Intelligence","Artificial Intelligence","Advanced Interface","Automated Interface"],1,"t","m","te"],["What is the time complexity of binary search?",["O(n)","O(n²)","O(log n)","O(n log n)"],2,"b","h","te"],["Which protocol does HTTPS use for encryption?",["SSL","TLS","SSH","AES"],1,"l","h","te"],["What does \"DNS\" stand for?",["Data Network System","Domain Name System","Digital Node Service","Dynamic Name Server"],1,"t","h","te"],["Who invented the World Wide Web?",["Bill Gates","Vint Cerf","Tim Berners-Lee","Alan Turing"],2,"b","h","te"]];
+const DNAME={e:'Easy',m:'Medium',h:'Hard'};
+const DSTEPS={e:1,m:2,h:3};
+const DSET={e:1,m:2,h:1};
+const DADV={e:1,m:2,h:3};
+const CNAME={g:'General',hi:'History',sc:'Science',sp:'Sport',fi:'Film',ge:'Geography',te:'Technology'};
+const GOAL=20,LIVES=3,STREAK_AT=3,THREAT_START=-6;
+let G={};
+const $=id=>document.getElementById(id);
+const rnd=arr=>arr[Math.floor(Math.random()*arr.length)];
+function render(html){$('app').innerHTML=html}
+function heart(n){return Array.from({length:LIVES},(_,i)=>i<n?'❤️':'🖤').join('')}
+function trackHTML(pos,threat,goal){
+  let h='<div class="track">';
+  for(let i=0;i<=goal;i++){
+    let c='te',t=i===0?'S':i===goal?'G':i;
+    if(i===goal)c='tg';
+    else if(i===threat)c='tt';
+    else if(i<pos)c='td';
+    else if(i===pos)c='tc';
+    h+=`<div class="ts ${c}">${t}</div>`;
+  }
+  return h+'</div>';
+}
+function showLanding(){
+  render(`
+    <div class="screen">
+      <h1>🗺️ Trivia Trek</h1>
+      <p class="sub">Race to the goal — answer questions to advance!</p>
+      <div class="card">
+        <label>Mode</label>
+        <select id="mode" onchange="modeChange()">
+          <option value="solo">Solo</option>
+          <option value="multi">Multiplayer</option>
+        </select>
+        <div id="psetup">
+          <label>Your Name</label>
+          <input id="p0" value="Player 1"/>
+        </div>
+        <label>Category</label>
+        <select id="cat">
+          <option value="">Mixed</option>
+          ${Object.entries(CNAME).map(([k,v])=>`<option value="${k}">${v}</option>`).join('')}
+        </select>
+        <label>Track Length</label>
+        <select id="goal">
+          <option value="10">Short (10)</option>
+          <option value="20" selected>Normal (20)</option>
+          <option value="30">Long (30)</option>
+        </select>
+        <br/><br/>
+        <button class="btn btn-primary" onclick="startGame()">▶ Start Game</button>
+      </div>
+    </div>
+  `);
+}
+function modeChange(){
+  const m=$('mode').value;
+  if(m==='solo'){
+    $('psetup').innerHTML=`<label>Your Name</label><input id="p0" value="Player 1"/>`;
+  } else {
+    $('psetup').innerHTML=`
+      <label>Players</label>
+      <select id="np" onchange="npChange()"><option value="2">2</option><option value="3">3</option><option value="4">4</option></select>
+      <div id="pi"></div>`;
+    npChange();
+  }
+}
+function npChange(){
+  const n=parseInt($('np').value)||2;
+  $('pi').innerHTML=Array.from({length:n},(_,i)=>`<label>Player ${i+1}</label><input id="p${i}" value="Player ${i+1}"/>`).join('');
+}
+function startGame(){
+  const mode=$('mode').value;
+  const cat=$('cat').value;
+  const goal=parseInt($('goal').value)||20;
+  const n=mode==='solo'?1:parseInt($('np')?$('np').value:2)||2;
+  const names=Array.from({length:n},(_,i)=>($('p'+i)||{value:'Player '+(i+1)}).value.trim()||'Player '+(i+1));
+  G={mode,cat,goal,players:names.map((nm,i)=>({id:i,nm,pos:0,lives:LIVES,streak:0,score:0,out:false})),cur:0,q:null,diff:null,asked:new Set(),threat:THREAT_START,fb:null};
+  showDiff();
+}
+function showDiff(){
+  const p=G.players[G.cur];
+  const others=G.mode==='multi'?G.players.filter(x=>!x.out&&x.id!==p.id):[];
+  render(`
+    <div class="screen">
+      <h2>${p.nm}'s Turn</h2>
+      <div class="pcard ap">
+        <div class="row"><b>${p.nm}</b><span>${heart(p.lives)}</span></div>
+        ${trackHTML(p.pos,G.threat,G.goal)}
+        <div class="row"><span class="muted">Step ${p.pos}/${G.goal}</span><span class="muted">Score: ${p.score}</span></div>
+      </div>
+      ${others.map(o=>`
+        <div class="pcard">
+          <div class="row"><span>${o.nm}</span><span>${heart(o.lives)}</span></div>
+          ${trackHTML(o.pos,G.threat,G.goal)}
+        </div>`).join('')}
+      <div class="card">
+        <p style="color:#94a3b8;font-size:.9rem;margin-bottom:12px">Choose difficulty:</p>
+        <div class="g3">
+          <button class="btn btn-outline" style="text-align:center" onclick="pickDiff('e')"><span class="badge be">Easy</span><br/><small class="muted">+1 step</small></button>
+          <button class="btn btn-outline" style="text-align:center" onclick="pickDiff('m')"><span class="badge bm">Medium</span><br/><small class="muted">+2 steps</small></button>
+          <button class="btn btn-outline" style="text-align:center" onclick="pickDiff('h')"><span class="badge bh">Hard</span><br/><small class="muted">+3 steps</small></button>
+        </div>
+      </div>
+    </div>
+  `);
+}
+function pickDiff(d){
+  const pool=QD.filter(q=>{
+    if(G.asked.has(q[0])) return false;
+    if(q[4]!==d) return false;
+    if(G.cat && q[5]!==G.cat) return false;
+    return true;
+  });
+  const fallback=pool.length?pool:QD.filter(q=>!G.asked.has(q[0])&&(!G.cat||q[5]===G.cat));
+  if(!fallback.length){endGame(false);return;}
+  G.diff=d; G.q=rnd(fallback);
+  showQ();
+}
+function showQ(){
+  const q=G.q, p=G.players[G.cur];
+  render(`
+    <div class="screen">
+      <div class="row" style="margin-bottom:12px">
+        <span style="font-weight:600">${p.nm}</span>
+        <span><span class="badge b${G.diff}">${DNAME[G.diff]}</span><span class="tag">${CNAME[q[5]]}</span></span>
+      </div>
+      <div class="card"><p style="font-size:1.05rem;font-weight:600;line-height:1.5">${q[0]}</p></div>
+      <div class="g2">
+        ${q[1].map((opt,i)=>`<button class="btn btn-outline" id="b${i}" onclick="ans(${i})">${opt}</button>`).join('')}
+      </div>
+    </div>
+  `);
+}
+function ans(idx){
+  const q=G.q, p=G.players[G.cur];
+  q[1].forEach((_,i)=>{const b=$('b'+i);if(b){b.disabled=true;b.onclick=null;}});
+  $('b'+q[2]).className='btn btn-correct';
+  if(idx!==q[2]) $('b'+idx).className='btn btn-wrong';
+  setTimeout(()=>{
+    G.asked.add(q[0]);
+    const ok=idx===q[2];
+    let msg='';
+    if(ok){
+      const ns=p.streak+1, bonus=ns>=STREAK_AT&&ns%STREAK_AT===0;
+      const steps=DSTEPS[G.diff]+(bonus?1:0);
+      p.pos=Math.min(p.pos+steps,G.goal); p.streak=ns; p.score+=DSTEPS[G.diff]*10+(bonus?20:0);
+      msg=bonus?`Correct! +${steps} steps (streak bonus!)`:`Correct! +${steps} step${steps>1?'s':''}`;
+    } else {
+      p.streak=0;
+      if(q[3]==='b'){const sb=DSET[G.diff];const np=Math.max(0,p.pos-sb);msg=`Wrong! Move back ${p.pos-np} step${p.pos-np>1?'s':''}.`;p.pos=np;}
+      else if(q[3]==='l'){p.lives--;if(p.lives<=0){p.out=true;p.lives=0;}msg=p.out?'Wrong! Eliminated!':`Wrong! Lose a life. ${p.lives} left.`;}
+      else{const adv=DADV[G.diff];G.threat+=adv;msg=`Wrong! Threat advances ${adv} step${adv>1?'s':''}!`;}
+    }
+    G.fb={ok,msg};
+    if(p.pos>=G.goal){endGame(true);return;}
+    if(G.mode==='solo'&&G.threat>=p.pos){endGame(false);return;}
+    if(p.out){
+      const active=G.players.filter(x=>!x.out);
+      if(!active.length){endGame(false);return;}
+      if(G.mode==='multi'&&active.length===1){G.cur=G.players.indexOf(active[0]);endGame(true);return;}
+    }
+    showFB();
+  },700);
+}
+function showFB(){
+  const fb=G.fb, p=G.players[G.cur];
+  render(`
+    <div class="screen">
+      <div class="fb ${fb.ok?'fb-ok':'fb-no'}">${fb.ok?'✅':'❌'} ${fb.msg}</div>
+      <div class="pcard ap">
+        <div class="row"><b>${p.nm}</b><span>${heart(p.lives)}</span></div>
+        ${trackHTML(p.pos,G.threat,G.goal)}
+        <div class="row"><span class="muted">Step ${p.pos}/${G.goal}</span><span class="muted">Score: ${p.score}</span></div>
+      </div>
+      <button class="btn btn-primary" onclick="nextTurn()">Next Turn →</button>
+    </div>
+  `);
+}
+function nextTurn(){
+  const t=G.players.length;
+  let n=(G.cur+1)%t, c=0;
+  while(G.players[n].out&&c<t){n=(n+1)%t;c++;}
+  G.cur=n; G.q=null; G.diff=null; G.fb=null;
+  showDiff();
+}
+function endGame(won){
+  const sorted=[...G.players].sort((a,b)=>b.pos-a.pos||b.score-a.score);
+  render(`
+    <div class="screen">
+      <span class="big">${won?'🏆':'💀'}</span>
+      <h1>${won?'Victory!':'Game Over'}</h1>
+      <p class="sub" style="margin:8px 0 24px">${won?(G.mode==='multi'?`${sorted[0].nm} wins!`:'You reached the goal!'):'Better luck next time!'}</p>
+      <div class="card">
+        <table><thead><tr><th>#</th><th>Player</th><th>Steps</th><th>Score</th></tr></thead>
+        <tbody>${sorted.map((p,i)=>`<tr><td>${['🥇','🥈','🥉'][i]||i+1}</td><td>${p.nm}${p.out?' ❌':''}</td><td>${p.pos}/${G.goal}</td><td>${p.score}</td></tr>`).join('')}</tbody>
+        </table>
+      </div>
+      <button class="btn btn-primary" onclick="showLanding()">Play Again</button>
+    </div>
+  `);
+}
+showLanding();
+</script>
+</body>
+</html>
