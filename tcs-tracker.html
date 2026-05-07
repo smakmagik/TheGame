@@ -108,6 +108,15 @@ const CATS = [
 
 const CCYS = ['INR','USD','EUR','GBP','AED','SGD','THB','JPY','CHF','AUD','CAD','HKD','MYR','IDR','NZD','ZAR','SEK','NOK','DKK','BHD','QAR','KWD','OMR','SAR'];
 
+const FY_MONTHS = [
+  {val:'2026-04',label:'April 2026'},{val:'2026-05',label:'May 2026'},
+  {val:'2026-06',label:'June 2026'},{val:'2026-07',label:'July 2026'},
+  {val:'2026-08',label:'August 2026'},{val:'2026-09',label:'September 2026'},
+  {val:'2026-10',label:'October 2026'},{val:'2026-11',label:'November 2026'},
+  {val:'2026-12',label:'December 2026'},{val:'2027-01',label:'January 2027'},
+  {val:'2027-02',label:'February 2027'},{val:'2027-03',label:'March 2027'}
+];
+
 // ── State ──────────────────────────────────────────────────────────────────
 let S = { tab:'dashboard', txns:[], editId:null, filter:{card:'',holder:'',cat:''}, imp:{step:'upload',card:'',rows:[],loading:false,error:''} };
 
@@ -117,6 +126,15 @@ function uid() { return Date.now().toString(36)+Math.random().toString(36).slice
 
 // ── Helpers ────────────────────────────────────────────────────────────────
 function fmt(n) { return '₹'+Math.round(n||0).toLocaleString('en-IN'); }
+function fmtMonth(d) {
+  if(!d) return '';
+  const p=d.slice(0,7).split('-');
+  return ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][parseInt(p[1])-1]+' '+p[0];
+}
+function curFYMonth() {
+  const n=new Date(); const s=`${n.getFullYear()}-${String(n.getMonth()+1).padStart(2,'0')}`;
+  return (s>='2026-04'&&s<='2027-03')?s:'2026-04';
+}
 function fmtFCY(a,c) { if(!a||c==='INR') return ''; return (+a).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})+' '+c; }
 function pct(n,t) { return t?Math.min(100,(n/t)*100):0; }
 function holderById(id) { return HOLDERS.find(h=>h.id===id)||{}; }
@@ -286,7 +304,7 @@ ${recent.length?`<div class="sec">Recent Transactions</div>
   <tbody>${recent.map(t=>{
     const h=holderById(t.holder); const cat=catById(t.cat);
     return `<tr>
-      <td style="white-space:nowrap">${t.date}</td>
+      <td style="white-space:nowrap">${fmtMonth(t.date)}</td>
       <td><div style="font-size:.82rem">${h.name||''}</div><div style="font-size:.68rem;color:#64748b">${CARDS[h.card]||''}</div></td>
       <td style="font-size:.82rem">${esc(t.merchant)||'—'}</td>
       <td><div class="mono">${fmt(t.amtINR)}</div>${t.amtFCY&&t.currency!=='INR'?`<div style="font-size:.7rem;color:#64748b">${fmtFCY(t.amtFCY,t.currency)}</div>`:''}</td>
@@ -304,7 +322,11 @@ function renderForm() {
   return `<div class="card" style="max-width:680px">
   <div style="font-weight:700;font-size:.95rem;margin-bottom:16px">${S.editId?'Edit Transaction':'Add New Transaction'}</div>
   <div class="fg">
-    <div><label>Date *</label><input type="date" id="f-date" value="${e.date||new Date().toISOString().slice(0,10)}" min="2026-04-01" max="2027-03-31"/></div>
+    <div><label>Month *</label>
+      <select id="f-date">
+        ${FY_MONTHS.map(m=>`<option value="${m.val}"${(e.date?e.date.slice(0,7):curFYMonth())===m.val?' selected':''}>${m.label}</option>`).join('')}
+      </select>
+    </div>
     <div><label>Card *</label>
       <select id="f-card" onchange="onCardChange()">
         <option value="">— Select card —</option>
@@ -532,7 +554,7 @@ ${filtered.length===0?`<div class="empty">No transactions${S.txns.length?` match
     const h=holderById(t.holder); const cat=catById(t.cat);
     const remCls=t.rem===0?'c-red':t.rem<250000?'c-amber':'c-green';
     return `<tr>
-      <td style="white-space:nowrap">${t.date}</td>
+      <td style="white-space:nowrap">${fmtMonth(t.date)}</td>
       <td><span class="badge b-${h.card||''}">${h.card?CARDS[h.card]:'—'}</span></td>
       <td style="font-size:.78rem;white-space:nowrap">${h.name||'—'}</td>
       <td style="max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:.8rem" title="${esc(t.merchant||'')}">${esc(t.merchant)||'—'}</td>
@@ -627,7 +649,7 @@ function setF(k,v) { S.filter[k]=v; render(); }
 
 function exportCSV() {
   const rows=getRunning();
-  const hdr=['Date','Card','Holder','Role','Merchant','INR Amount','FCY Amount','Currency','Category','Counts TCS','TCS Rate %','Running TCS Total','Limit Remaining','Notes'];
+  const hdr=['Month','Card','Holder','Role','Merchant','INR Amount','FCY Amount','Currency','Category','Counts TCS','TCS Rate %','Running TCS Total','Limit Remaining','Notes'];
   const lines=[hdr.join(',')];
   for(const t of rows){
     const h=holderById(t.holder); const cat=catById(t.cat);
@@ -724,7 +746,7 @@ function renderReview() {
     const cat=catById(r.cat);
     return `<tr class="${r.include?'':'rev-row-skip'}">
       <td><input type="checkbox" ${r.include?'checked':''} onchange="toggleRow(${i},this.checked)"/></td>
-      <td style="white-space:nowrap;font-size:.78rem">${r.date}</td>
+      <td style="white-space:nowrap;font-size:.78rem">${fmtMonth(r.date)}</td>
       <td>
         <select style="font-size:.72rem;padding:3px 5px;min-width:100px" onchange="updateRow(${i},'holder',this.value)">
           ${hOpts.map(h=>`<option value="${h.id}"${r.holder===h.id?' selected':''}>${h.name}</option>`).join('')}
@@ -929,7 +951,7 @@ function extractTxnsFromLines(lines,cardId) {
       const currency=fcym?fcym[1].toUpperCase():'INR';
       const cat=classifyForImport(full,!!fcym);
       const merchant=impCleanMerchant(full,dm[1],fcym?fcym[0]:null,inrm[0]);
-      txns.push({date:dateStr,holder:curHolder,merchant,amtINR,amtFCY,currency,cat,notes:'',include:true});
+      txns.push({date:dateStr.slice(0,7),holder:curHolder,merchant,amtINR,amtFCY,currency,cat,notes:'',include:true});
     } else { i++; }
   }
   return txns;
