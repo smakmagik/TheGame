@@ -68,6 +68,10 @@ tbody tr:hover{background:#192231}
 .tw{overflow-x:auto}
 .divider{height:1px;background:#334155;margin:12px 0}
 .row{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+input[type="file"]{cursor:pointer;border-style:dashed;padding:10px}
+.spin{display:inline-block;width:18px;height:18px;border:2px solid #334155;border-top-color:#818cf8;border-radius:50%;animation:spin .7s linear infinite;vertical-align:middle}
+@keyframes spin{to{transform:rotate(360deg)}}
+.rev-row-skip{opacity:.32}
 @media(max-width:640px){.g4{grid-template-columns:1fr 1fr}.fg{grid-template-columns:1fr}.filter-bar{flex-direction:column;align-items:stretch}}
 @media(max-width:380px){.g4,.g2{grid-template-columns:1fr}}
 </style>
@@ -105,7 +109,7 @@ const CATS = [
 const CCYS = ['INR','USD','EUR','GBP','AED','SGD','THB','JPY','CHF','AUD','CAD','HKD','MYR','IDR','NZD','ZAR','SEK','NOK','DKK','BHD','QAR','KWD','OMR','SAR'];
 
 // ── State ──────────────────────────────────────────────────────────────────
-let S = { tab:'dashboard', txns:[], editId:null, filter:{card:'',holder:'',cat:''} };
+let S = { tab:'dashboard', txns:[], editId:null, filter:{card:'',holder:'',cat:''}, imp:{step:'upload',card:'',rows:[],loading:false,error:''} };
 
 function save() { try { localStorage.setItem('tcs2627', JSON.stringify(S.txns)); } catch(e){} }
 function loadData() { try { const d=localStorage.getItem('tcs2627'); if(d) S.txns=JSON.parse(d); } catch(e){ S.txns=[]; } }
@@ -207,7 +211,7 @@ function render() {
   <div style="display:flex;justify-content:space-between;font-size:.65rem;color:#334155;margin-top:2px"><span>₹0</span><span>₹10,00,000</span></div>
 </div>
 <div class="tabs">
-  ${[['dashboard','Dashboard'],['add',S.editId?'Edit Txn':'Add Txn'],['holders','By Holder'],['cards','By Card'],['categories','By Category'],['transactions','All Transactions']].map(([id,lbl])=>
+  ${[['dashboard','Dashboard'],['add',S.editId?'Edit Txn':'Add Txn'],['holders','By Holder'],['cards','By Card'],['categories','By Category'],['transactions','All Transactions'],['import','Import Statement']].map(([id,lbl])=>
     `<div class="tab ${S.tab===id?'active':''}" onclick="go('${id}')">${lbl}</div>`).join('')}
 </div>
 <div class="content">
@@ -217,6 +221,7 @@ function render() {
   ${S.tab==='cards'?renderCards():''}
   ${S.tab==='categories'?renderCategories():''}
   ${S.tab==='transactions'?renderTxns():''}
+  ${S.tab==='import'?renderImport():''}
 </div>`;
   if(S.tab==='add') initForm();
 }
@@ -643,8 +648,356 @@ function exportCSV() {
   URL.revokeObjectURL(url);
 }
 
+// ── Import: render ─────────────────────────────────────────────────────────
+
+function renderImport() {
+  if(S.imp.loading) return `
+<div style="text-align:center;padding:60px 20px">
+  <div style="margin-bottom:14px"><span class="spin"></span></div>
+  <div style="color:#94a3b8;font-size:.9rem">Parsing statement, please wait…</div>
+</div>`;
+  if(S.imp.step==='review') return renderReview();
+  return renderUpload();
+}
+
+function renderUpload() {
+  const imp=S.imp;
+  return `<div class="card" style="max-width:600px">
+  <div style="font-weight:700;font-size:.95rem;margin-bottom:3px">Import Statement</div>
+  <div style="font-size:.78rem;color:#64748b;margin-bottom:16px">Extract foreign transactions from an HDFC Infinia or Axis Atlas statement (PDF or CSV)</div>
+  ${imp.error?`<div class="alert a-danger" style="margin-bottom:14px">${imp.error}</div>`:''}
+  <div style="margin-bottom:12px">
+    <label>Card *</label>
+    <select id="imp-card">
+      <option value="">— Select card —</option>
+      ${Object.entries(CARDS).map(([k,v])=>`<option value="${k}"${imp.card===k?' selected':''}>${v}</option>`).join('')}
+    </select>
+  </div>
+  <div style="margin-bottom:16px">
+    <label>Statement File * <span style="color:#475569;font-size:.7rem">(PDF or CSV)</span></label>
+    <input type="file" id="imp-file" accept=".pdf,.csv" onchange="handleImpFile(this)"/>
+    <div style="font-size:.7rem;color:#334155;margin-top:4px">Your file is processed entirely in this browser — nothing is uploaded</div>
+  </div>
+  <div class="alert a-info" style="font-size:.77rem;line-height:1.6">
+    <strong>What gets extracted:</strong> Transactions with foreign currency (USD, EUR, AED, etc.),
+    INTL-marked charges, Indian travel aggregator bookings (MakeMyTrip, Cleartrip, Yatra, Ixigo…),
+    and foreign online subscriptions (Netflix, Spotify, Adobe…). Pure INR domestic transactions are skipped.<br><br>
+    <strong>Cardholder separation:</strong> The parser detects primary / supplementary card sections
+    in HDFC and Axis statements and assigns each transaction to the right holder. Review before importing.
+  </div>
+</div>`;
+}
+
+function renderReview() {
+  const rows=S.imp.rows;
+  const sel=rows.filter(r=>r.include);
+  const selEl=sel.filter(r=>catById(r.cat).tcs).reduce((s,r)=>s+(r.amtINR||0),0);
+  const selNl=sel.filter(r=>!catById(r.cat).tcs).reduce((s,r)=>s+(r.amtINR||0),0);
+  const hOpts=HOLDERS.filter(h=>h.card===S.imp.card);
+  return `
+<div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:12px">
+  <div class="row">
+    <button class="btn btn-o btn-sm" onclick="backToUpload()">← Back</button>
+    <span style="font-size:.88rem;font-weight:600">${rows.length} foreign transaction${rows.length!==1?'s':''} found in ${CARDS[S.imp.card]||''} statement</span>
+  </div>
+  <div class="row">
+    <button class="btn btn-o btn-sm" onclick="toggleAllRows(true)">Select All</button>
+    <button class="btn btn-o btn-sm" onclick="toggleAllRows(false)">Deselect All</button>
+    <button class="btn btn-s" onclick="confirmImport()" ${sel.length?'':'disabled style="opacity:.5;cursor:not-allowed"'}>
+      Import ${sel.length} transaction${sel.length!==1?'s':''}
+    </button>
+  </div>
+</div>
+<div class="alert a-info" style="font-size:.76rem;margin-bottom:10px">
+  <strong>${sel.length} selected</strong> — TCS eligible: <strong class="${selEl?'c-amber':'c-muted'}">${fmt(selEl)}</strong> · Non-TCS tracked: <strong class="c-blue">${fmt(selNl)}</strong>.
+  Adjust <em>Holder</em> or <em>Category</em> if auto-detection is off. Uncheck rows to skip. Categories drive TCS impact.
+</div>
+<div class="tw">
+<table>
+  <thead><tr>
+    <th style="width:28px">✓</th>
+    <th>Date</th><th>Holder</th><th>Merchant / Description</th>
+    <th>INR</th><th>FCY</th><th>Category</th><th>TCS?</th>
+  </tr></thead>
+  <tbody>
+  ${rows.map((r,i)=>{
+    const cat=catById(r.cat);
+    return `<tr class="${r.include?'':'rev-row-skip'}">
+      <td><input type="checkbox" ${r.include?'checked':''} onchange="toggleRow(${i},this.checked)"/></td>
+      <td style="white-space:nowrap;font-size:.78rem">${r.date}</td>
+      <td>
+        <select style="font-size:.72rem;padding:3px 5px;min-width:100px" onchange="updateRow(${i},'holder',this.value)">
+          ${hOpts.map(h=>`<option value="${h.id}"${r.holder===h.id?' selected':''}>${h.name}</option>`).join('')}
+        </select>
+      </td>
+      <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:.78rem" title="${esc(r.merchant)}">${esc(r.merchant)}</td>
+      <td class="mono" style="font-size:.8rem">${fmt(r.amtINR)}</td>
+      <td style="font-size:.72rem;color:#94a3b8;white-space:nowrap">${r.amtFCY&&r.currency!=='INR'?fmtFCY(r.amtFCY,r.currency):'—'}</td>
+      <td>
+        <select style="font-size:.68rem;padding:3px 5px;max-width:200px" onchange="updateRow(${i},'cat',this.value)">
+          <optgroup label="▲ Counts TCS">${CATS.filter(c=>c.tcs).map(c=>`<option value="${c.id}"${r.cat===c.id?' selected':''}>${c.icon} ${c.label}</option>`).join('')}</optgroup>
+          <optgroup label="▽ Non-TCS">${CATS.filter(c=>!c.tcs).map(c=>`<option value="${c.id}"${r.cat===c.id?' selected':''}>${c.icon} ${c.label}</option>`).join('')}</optgroup>
+        </select>
+      </td>
+      <td>${cat.tcs?'<span class="badge b-tcs">Yes</span>':'<span class="badge b-no">No</span>'}</td>
+    </tr>`;}).join('')}
+  </tbody>
+</table>
+</div>
+<div style="margin-top:14px">
+  <button class="btn btn-s" onclick="confirmImport()" ${sel.length?'':'disabled style="opacity:.5;cursor:not-allowed"'}>
+    Import ${sel.length} transaction${sel.length!==1?'s':''}
+  </button>
+</div>`;
+}
+
+// ── Import: file handling ──────────────────────────────────────────────────
+
+async function handleImpFile(input) {
+  const card=document.getElementById('imp-card').value;
+  if(!card){ S.imp.error='Please select a card first.'; render(); return; }
+  const file=input.files[0]; if(!file) return;
+  S.imp.card=card; S.imp.loading=true; S.imp.error=''; render();
+  try {
+    const ext=file.name.split('.').pop().toLowerCase();
+    if(ext==='pdf'){
+      if(typeof pdfjsLib==='undefined') throw new Error('PDF parser not loaded yet — wait a moment and retry, or use a CSV export instead');
+      await parsePDF(file,card);
+    } else {
+      await parseCSVFile(file,card);
+    }
+    if(!S.imp.rows.length){
+      S.imp.error='No foreign transactions detected. The statement format may not be supported — try the CSV export from your bank\'s net banking portal.';
+      S.imp.step='upload';
+    } else {
+      S.imp.step='review';
+    }
+  } catch(e) {
+    S.imp.error='Could not parse file: '+e.message+'. Try the CSV version of your statement.';
+    S.imp.step='upload';
+  }
+  S.imp.loading=false; render();
+}
+
+async function parsePDF(file,cardId) {
+  const buf=await file.arrayBuffer();
+  const pdf=await pdfjsLib.getDocument({data:buf,verbosity:0}).promise;
+  const allLines=[];
+  for(let pg=1;pg<=pdf.numPages;pg++){
+    const page=await pdf.getPage(pg);
+    const content=await page.getTextContent();
+    const byY={};
+    for(const item of content.items){
+      if(!item.str?.trim()) continue;
+      const y=Math.round(item.transform[5]/3)*3;
+      if(!byY[y]) byY[y]=[];
+      byY[y].push({x:item.transform[4],text:item.str});
+    }
+    Object.entries(byY)
+      .sort((a,b)=>+b[0]-+a[0])
+      .forEach(([,items])=>{
+        const line=items.sort((a,b)=>a.x-b.x).map(i=>i.text).join(' ').replace(/\s{2,}/g,' ').trim();
+        if(line) allLines.push(line);
+      });
+  }
+  S.imp.rows=extractTxnsFromLines(allLines,cardId);
+}
+
+async function parseCSVFile(file,cardId) {
+  const text=await file.text();
+  const lines=text.split(/\r?\n/).map(l=>l.trim()).filter(Boolean);
+  S.imp.rows=extractTxnsFromCSV(lines,cardId);
+}
+
+// ── Import: parsing logic ──────────────────────────────────────────────────
+
+const IMP_FCY_RE=/\b(USD|EUR|GBP|AED|SGD|THB|JPY|CHF|AUD|CAD|HKD|MYR|IDR|NZD|ZAR|SEK|NOK|DKK|BHD|QAR|KWD|OMR|SAR)\s*([\d,]+\.?\d*)/i;
+const IMP_DATE_RE=/\b(\d{2}[\/\-]\d{2}[\/\-]\d{2,4}|\d{1,2}[\s\-](?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[\s\-]\d{4})\b/i;
+const IMP_INR_RE=/([\d,]{2,}\.?\d{0,2})\s*(?:Dr|Cr|DB|CR)?\s*$/i;
+const IMP_INTL_RE=/\b(INTL|INTERNATIONAL|FOREIGN)\b/i;
+const IMP_TRAVEL_AGGS=/MAKEMYTRIP|CLEARTRIP|YATRA\b|IXIGO|EASEMYTRIP|GOIBIBO|MMT\b|THOMAS\s*COOK|COX\s*AND\s*KINGS|VEENA\s*WORLD|VIA\.COM|TRAVELJOCKEY/i;
+const IMP_ONLINE_SUBS=/NETFLIX|SPOTIFY|AMAZON\s*PRIME|APPLE\s*STORE|APPLE\.COM\/BILL|GOOGLE\s*PLAY|MICROSOFT|ADOBE|DROPBOX|ZOOM\b|SLACK\b|GITHUB|OPENAI|CHATGPT|META\s*QUEST|LINKEDIN|DISNEY\+|HOTSTAR|EXPEDIA|BOOKING\.COM|BOOKING\s*COM|AIRBNB|AGODA|HOTELS\.COM/i;
+const IMP_HOTEL_RE=/\bHOTEL\b|RESORT\b|MARRIOTT|HILTON|HYATT|SHERATON|WESTIN|RITZ\s*CARLTON|FOUR\s*SEASONS|ACCOR|RADISSON|NOVOTEL|SOFITEL|IBIS|HOLIDAY\s*INN|CROWNE\s*PLAZA|INTERCONTINENTAL/i;
+const IMP_FLIGHT_RE=/AIRLINE|AIRWAYS|EMIRATES|ETIHAD|LUFTHANSA|BRITISH\s*AIR|SINGAPORE\s*AIR|AIR\s*FRANCE|KLM\b|QATAR\s*AIR|UNITED\s*AIRLINES|DELTA\b|AMERICAN\s*AIR|CATHAY|FLYDUBAI|INDIGO\b|SPICEJET|VISTARA|AIR\s*INDIA/i;
+
+function detectHolderSection(line,cardId) {
+  const up=line.toUpperCase();
+  for(const h of HOLDERS){
+    if(h.card!==cardId) continue;
+    const nm=h.name.toUpperCase();
+    // Section header: name + card/supplementary/primary/member keyword
+    if(up.includes(nm)&&/CARD|SUPPLEMENTARY|PRIMARY|MEMBER|HOLDER|ADD.ON|ADDON/i.test(up)) return h.id;
+    // Standalone name line (no date, no amount)
+    if(up.trim()===nm&&!IMP_DATE_RE.test(line)&&!IMP_FCY_RE.test(line)) return h.id;
+  }
+  return null;
+}
+
+function classifyForImport(text,hasFCY) {
+  const T=text.toUpperCase();
+  if(IMP_TRAVEL_AGGS.test(T)){
+    return IMP_HOTEL_RE.test(T)?'hotel_agg':'flight_agg';
+  }
+  if(IMP_ONLINE_SUBS.test(T)){
+    if(/BOOKING\.COM|BOOKING\s*COM|AIRBNB|AGODA|HOTELS/.test(T)) return 'hotel_agg';
+    return 'sub_foreign';
+  }
+  if(hasFCY){
+    if(/POS\s*ABROAD|OFFLINE\s*INTL|INTL\s*POS/.test(T)) return 'swipe_abroad';
+    if(IMP_FLIGHT_RE.test(T)) return 'swipe_abroad';
+    if(IMP_HOTEL_RE.test(T)) return 'swipe_abroad';
+    return 'fm_fcy';
+  }
+  if(IMP_INTL_RE.test(T)) return 'fm_inr';
+  return 'fm_fcy';
+}
+
+function impParseDate(s) {
+  if(!s) return '';
+  s=s.trim();
+  let m=s.match(/^(\d{2})[\/\-](\d{2})[\/\-](\d{4})$/);
+  if(m) return `${m[3]}-${m[2]}-${m[1]}`;
+  m=s.match(/^(\d{2})[\/\-](\d{2})[\/\-](\d{2})$/);
+  if(m) return `20${m[3]}-${m[2]}-${m[1]}`;
+  m=s.match(/^(\d{1,2})[\s\-](Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[\s\-](\d{4})$/i);
+  if(m){
+    const mo={Jan:'01',Feb:'02',Mar:'03',Apr:'04',May:'05',Jun:'06',Jul:'07',Aug:'08',Sep:'09',Oct:'10',Nov:'11',Dec:'12'};
+    return `${m[3]}-${mo[m[2]]}-${m[1].padStart(2,'0')}`;
+  }
+  return '';
+}
+
+function impCleanMerchant(text,dateStr,fcyStr,inrStr) {
+  let t=text;
+  if(dateStr) t=t.replace(dateStr,'');
+  if(fcyStr) t=t.replace(fcyStr,'').replace(/@\s*[\d.]+/g,'');
+  if(inrStr) t=t.replace(inrStr,'');
+  return t.replace(/\b(Dr|Cr|DB|CR)\b/gi,'')
+    .replace(/Conversion\s*Rate\s*:?\s*[\d.]+/gi,'')
+    .replace(/\s{2,}/g,' ').trim().slice(0,130);
+}
+
+function impCSVLine(line) {
+  const cols=[];let cur='';let inQ=false;
+  for(let i=0;i<line.length;i++){
+    const c=line[i];
+    if(c==='"'){if(inQ&&line[i+1]==='"'){cur+='"';i++;}else inQ=!inQ;}
+    else if(c===','&&!inQ){cols.push(cur);cur='';}
+    else cur+=c;
+  }
+  cols.push(cur);
+  return cols.map(c=>c.trim().replace(/^"|"$/g,''));
+}
+
+function impFindCol(header,candidates) {
+  for(const c of candidates){const i=header.findIndex(h=>h.includes(c));if(i>=0)return i;}
+  return -1;
+}
+
+function extractTxnsFromLines(lines,cardId) {
+  const txns=[];
+  const primary=HOLDERS.find(h=>h.card===cardId&&h.role==='Primary');
+  let curHolder=primary?primary.id:HOLDERS.find(h=>h.card===cardId)?.id;
+  let i=0;
+  while(i<lines.length){
+    const line=lines[i];
+    const hs=detectHolderSection(line,cardId);
+    if(hs){curHolder=hs;i++;continue;}
+    const dm=line.match(IMP_DATE_RE);
+    if(dm&&dm.index<25){
+      // Collect up to 5 continuation lines
+      const block=[line];
+      for(let j=i+1;j<Math.min(i+6,lines.length);j++){
+        const nl=lines[j];
+        if(nl.match(IMP_DATE_RE)?.[0]&&lines[j].indexOf(nl.match(IMP_DATE_RE)[0])<25) break;
+        if(detectHolderSection(nl,cardId)) break;
+        block.push(nl);
+      }
+      i+=block.length;
+      const full=block.join(' ');
+      const fcym=full.match(IMP_FCY_RE);
+      const inrm=full.match(IMP_INR_RE);
+      const hasINTL=IMP_INTL_RE.test(full);
+      const isForeign=fcym||hasINTL||IMP_TRAVEL_AGGS.test(full)||IMP_ONLINE_SUBS.test(full);
+      if(!isForeign||!inrm) continue;
+      const amtINR=parseFloat(inrm[1].replace(/,/g,''))||0;
+      if(amtINR<10) continue;
+      if(amtINR<300&&/\bfee\b|\bgst\b|\btax\b|\bcharge\b/i.test(full)) continue;
+      const dateStr=impParseDate(dm[1]);
+      if(!dateStr) continue;
+      const amtFCY=fcym?parseFloat(fcym[2].replace(/,/g,'')):null;
+      const currency=fcym?fcym[1].toUpperCase():'INR';
+      const cat=classifyForImport(full,!!fcym);
+      const merchant=impCleanMerchant(full,dm[1],fcym?fcym[0]:null,inrm[0]);
+      txns.push({date:dateStr,holder:curHolder,merchant,amtINR,amtFCY,currency,cat,notes:'',include:true});
+    } else { i++; }
+  }
+  return txns;
+}
+
+function extractTxnsFromCSV(lines,cardId) {
+  if(lines.length<2) return [];
+  const header=impCSVLine(lines[0]).map(h=>h.toUpperCase().trim());
+  const dCol=impFindCol(header,['TRANSACTION DATE','DATE','TXN DATE','POSTING DATE']);
+  const nCol=impFindCol(header,['NARRATION','DESCRIPTION','TRANSACTION DETAILS','DETAILS','PARTICULARS','MERCHANT']);
+  const aCol=impFindCol(header,['DEBIT AMOUNT','DEBIT','WITHDRAWAL AMT','DR AMOUNT','AMOUNT']);
+  if(dCol<0||nCol<0||aCol<0) throw new Error(
+    `Could not identify required columns. Found: ${header.slice(0,8).join(', ')}. Expected Date, Description/Narration, and Debit/Amount columns.`);
+  const primary=HOLDERS.find(h=>h.card===cardId&&h.role==='Primary');
+  let curHolder=primary?primary.id:HOLDERS.find(h=>h.card===cardId)?.id;
+  const txns=[];
+  for(let i=1;i<lines.length;i++){
+    const cols=impCSVLine(lines[i]);
+    if(cols.length<=Math.max(dCol,nCol,aCol)) continue;
+    const rawDate=cols[dCol]?.trim();
+    const desc=(cols[nCol]?.trim())||'';
+    const amtINR=parseFloat((cols[aCol]||'').replace(/[,₹\s]/g,''))||0;
+    if(!rawDate||!desc||!amtINR) continue;
+    const hs=detectHolderSection(desc,cardId);
+    if(hs){curHolder=hs;continue;}
+    const dateStr=impParseDate(rawDate);
+    if(!dateStr) continue;
+    const fcym=desc.match(IMP_FCY_RE);
+    const hasINTL=IMP_INTL_RE.test(desc);
+    const isForeign=fcym||hasINTL||IMP_TRAVEL_AGGS.test(desc)||IMP_ONLINE_SUBS.test(desc);
+    if(!isForeign) continue;
+    if(amtINR<10) continue;
+    if(amtINR<300&&/\bfee\b|\bgst\b|\btax\b|\bcharge\b/i.test(desc)) continue;
+    const amtFCY=fcym?parseFloat(fcym[2].replace(/,/g,'')):null;
+    const currency=fcym?fcym[1].toUpperCase():'INR';
+    const cat=classifyForImport(desc,!!fcym);
+    const merchant=desc.replace(IMP_FCY_RE,'').replace(/@\s*[\d.]+/g,'').replace(/\s{2,}/g,' ').trim().slice(0,130);
+    txns.push({date:dateStr,holder:curHolder,merchant,amtINR,amtFCY,currency,cat,notes:'',include:true});
+  }
+  return txns;
+}
+
+// ── Import: handlers ───────────────────────────────────────────────────────
+
+function toggleRow(i,v){S.imp.rows[i].include=v;render();}
+function toggleAllRows(v){S.imp.rows.forEach(r=>r.include=v);render();}
+function updateRow(i,f,v){S.imp.rows[i][f]=v;render();}
+function backToUpload(){S.imp={step:'upload',card:S.imp.card,rows:[],loading:false,error:''};render();}
+function confirmImport(){
+  const toAdd=S.imp.rows.filter(r=>r.include);
+  for(const r of toAdd){
+    S.txns.push({id:uid(),_c:Date.now(),date:r.date,holder:r.holder,merchant:r.merchant,
+      amtINR:r.amtINR,amtFCY:r.amtFCY||null,currency:r.currency,cat:r.cat,notes:r.notes||''});
+  }
+  save();
+  S.imp={step:'upload',card:'',rows:[],loading:false,error:''};
+  S.tab='dashboard';
+  render();
+}
+
 // ── Init ───────────────────────────────────────────────────────────────────
 loadData(); render();
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js" crossorigin="anonymous"></script>
+<script>
+if(typeof pdfjsLib!=='undefined'){
+  pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+}
 </script>
 </body>
 </html>
