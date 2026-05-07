@@ -1,0 +1,1025 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>TCS Tracker · FY 2026–27</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:system-ui,-apple-system,sans-serif;background:#0f172a;color:#f1f5f9;min-height:100vh}
+.topbar{background:#1e293b;border-bottom:1px solid #334155;padding:14px 20px;position:sticky;top:0;z-index:100}
+.topbar-title{font-size:1.15rem;font-weight:800;background:linear-gradient(135deg,#38bdf8,#818cf8);-webkit-background-clip:text;-webkit-text-fill-color:transparent;display:inline-block}
+.topbar-row{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:10px}
+.fy-tag{font-size:.72rem;color:#94a3b8;background:#0f172a;padding:3px 8px;border-radius:6px;display:inline-block}
+.limit-label{display:flex;justify-content:space-between;font-size:.73rem;margin-bottom:4px}
+.limit-bar{height:9px;background:#0f172a;border-radius:5px;overflow:hidden;border:1px solid #1e293b}
+.limit-fill{height:100%;border-radius:5px;transition:width .5s}
+.fill-safe{background:linear-gradient(90deg,#22c55e,#86efac)}
+.fill-warn{background:linear-gradient(90deg,#f59e0b,#fcd34d)}
+.fill-danger{background:linear-gradient(90deg,#ef4444,#f87171)}
+.tabs{display:flex;gap:0;padding:0 16px;background:#1e293b;border-bottom:1px solid #334155;overflow-x:auto}
+.tab{padding:9px 14px;font-size:.8rem;font-weight:600;color:#64748b;cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap;transition:all .15s}
+.tab.active{color:#818cf8;border-color:#818cf8}
+.tab:hover:not(.active){color:#cbd5e1}
+.content{padding:16px 18px;max-width:1200px;margin:0 auto}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.g4{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.card{background:#1e293b;border-radius:12px;padding:14px}
+.card-title{font-size:.68rem;font-weight:700;text-transform:uppercase;color:#64748b;margin-bottom:8px;letter-spacing:.06em}
+.stat{font-size:1.5rem;font-weight:800}
+.stat-sub{font-size:.75rem;color:#64748b;margin-top:2px}
+.c-green{color:#4ade80}.c-amber{color:#fbbf24}.c-red{color:#f87171}.c-blue{color:#38bdf8}.c-muted{color:#94a3b8}
+.badge{display:inline-block;padding:2px 7px;border-radius:5px;font-size:.67rem;font-weight:700;text-transform:uppercase;white-space:nowrap}
+.b-tcs{background:#7f1d1d;color:#fca5a5}
+.b-no{background:#14532d;color:#86efac}
+.b-2{background:#713f12;color:#fde68a}
+.b-20{background:#7f1d1d;color:#fca5a5}
+.b-inf{background:#1e3a5f;color:#93c5fd}
+.b-atl{background:#2d1b4e;color:#c4b5fd}
+.b-pri{background:#1e293b;color:#94a3b8;border:1px solid #334155}
+label{display:block;font-size:.78rem;color:#94a3b8;margin-bottom:3px}
+input,select{width:100%;padding:8px 11px;background:#0f172a;border:1px solid #334155;border-radius:8px;color:#f1f5f9;font-size:.88rem;outline:none;transition:border-color .15s}
+input:focus,select:focus{border-color:#818cf8}
+.fg{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.btn{padding:8px 14px;border-radius:8px;border:none;font-size:.85rem;font-weight:600;cursor:pointer;transition:all .15s}
+.btn-p{background:#4f46e5;color:#fff}.btn-p:hover{background:#4338ca}
+.btn-s{background:#16a34a;color:#fff}.btn-s:hover{background:#15803d}
+.btn-d{background:#dc2626;color:#fff}.btn-d:hover{background:#b91c1c}
+.btn-o{background:transparent;border:1px solid #334155;color:#94a3b8}.btn-o:hover{border-color:#818cf8;color:#818cf8}
+.btn-sm{padding:4px 9px;font-size:.74rem}
+table{width:100%;border-collapse:collapse;font-size:.8rem}
+thead th{padding:9px 7px;text-align:left;color:#64748b;font-size:.67rem;text-transform:uppercase;letter-spacing:.05em;border-bottom:1px solid #334155;white-space:nowrap}
+tbody td{padding:8px 7px;border-bottom:1px solid #1a2333;vertical-align:middle}
+tbody tr:hover{background:#192231}
+.mono{font-variant-numeric:tabular-nums;font-weight:700}
+.alert{padding:10px 14px;border-radius:8px;font-size:.83rem;margin-bottom:12px}
+.a-info{background:#0c1e38;color:#93c5fd;border:1px solid #1d4ed8}
+.a-warn{background:#2d1f06;color:#fde68a;border:1px solid #d97706}
+.a-danger{background:#2d0a0a;color:#fca5a5;border:1px solid #dc2626}
+.sec{font-size:.88rem;font-weight:700;color:#cbd5e1;margin:18px 0 10px;border-bottom:1px solid #334155;padding-bottom:6px}
+.filter-bar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;align-items:center}
+.filter-bar select{width:auto;padding:6px 9px;font-size:.78rem}
+.hcard{background:#0f172a;border-radius:8px;padding:11px;margin-bottom:8px}
+.pbar{height:6px;background:#1e293b;border-radius:3px;overflow:hidden;margin-top:5px}
+.pfill{height:100%;border-radius:3px;transition:width .4s}
+.cat-row{display:flex;align-items:center;justify-content:space-between;padding:9px 0;border-bottom:1px solid #0f172a}
+.cat-row:last-child{border-bottom:none}
+.empty{text-align:center;color:#475569;padding:48px 20px;font-size:.88rem}
+.tw{overflow-x:auto}
+.divider{height:1px;background:#334155;margin:12px 0}
+.row{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+input[type="file"]{cursor:pointer;border-style:dashed;padding:10px}
+.spin{display:inline-block;width:18px;height:18px;border:2px solid #334155;border-top-color:#818cf8;border-radius:50%;animation:spin .7s linear infinite;vertical-align:middle}
+@keyframes spin{to{transform:rotate(360deg)}}
+.rev-row-skip{opacity:.32}
+@media(max-width:640px){.g4{grid-template-columns:1fr 1fr}.fg{grid-template-columns:1fr}.filter-bar{flex-direction:column;align-items:stretch}}
+@media(max-width:380px){.g4,.g2{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script>
+// ── Constants ──────────────────────────────────────────────────────────────
+const LIMIT = 1000000;
+const FY = 'FY 2026–27';
+
+const CARDS = { infinia: 'HDFC Infinia', atlas: 'Axis Atlas' };
+
+const HOLDERS = [
+  { id:'saahil_infinia', name:'Saahil Desai',  card:'infinia', role:'Primary' },
+  { id:'nandita_infinia',name:'Nandita Desai', card:'infinia', role:'Add-on'  },
+  { id:'sanil_infinia',  name:'Sanil Desai',   card:'infinia', role:'Add-on'  },
+  { id:'nikhil_infinia', name:'Nikhil Desai',  card:'infinia', role:'Add-on'  },
+  { id:'saahil_atlas',   name:'Saahil Desai',  card:'atlas',   role:'Primary' },
+  { id:'sanil_atlas',    name:'Sanil Desai',   card:'atlas',   role:'Add-on'  }
+];
+
+const CATS = [
+  { id:'flight_agg', label:'Intl Flight — Indian Aggregator',         tcs:true,  rate:0.02, icon:'✈️' },
+  { id:'hotel_agg',  label:'Intl Hotel — Indian Aggregator',          tcs:true,  rate:0.02, icon:'🏨' },
+  { id:'tour_pkg',   label:'Overseas Tour Package (Indian Agent)',     tcs:true,  rate:0.02, icon:'🗺️' },
+  { id:'fm_inr',     label:'Foreign Merchant in India — INR Billing', tcs:true,  rate:0.20, icon:'🛍️' },
+  { id:'fm_fcy',     label:'Foreign Merchant in India — FCY Billing', tcs:true,  rate:0.20, icon:'💱' },
+  { id:'sub_foreign',label:'Foreign Subscription / Online (India)',   tcs:true,  rate:0.20, icon:'📱' },
+  { id:'swipe_abroad',label:'Physical Swipe Abroad (POS)',            tcs:false, rate:0,    icon:'💳' },
+  { id:'online_abroad',label:'Online Purchase Abroad (FCY)',          tcs:false, rate:0,    icon:'🌐' },
+  { id:'agg_abroad', label:'Travel Aggregator Booking (Abroad)',      tcs:false, rate:0,    icon:'🧳' }
+];
+
+const CCYS = ['INR','USD','EUR','GBP','AED','SGD','THB','JPY','CHF','AUD','CAD','HKD','MYR','IDR','NZD','ZAR','SEK','NOK','DKK','BHD','QAR','KWD','OMR','SAR'];
+
+const FY_MONTHS = [
+  {val:'2026-04',label:'April 2026'},{val:'2026-05',label:'May 2026'},
+  {val:'2026-06',label:'June 2026'},{val:'2026-07',label:'July 2026'},
+  {val:'2026-08',label:'August 2026'},{val:'2026-09',label:'September 2026'},
+  {val:'2026-10',label:'October 2026'},{val:'2026-11',label:'November 2026'},
+  {val:'2026-12',label:'December 2026'},{val:'2027-01',label:'January 2027'},
+  {val:'2027-02',label:'February 2027'},{val:'2027-03',label:'March 2027'}
+];
+
+// ── State ──────────────────────────────────────────────────────────────────
+let S = { tab:'dashboard', txns:[], editId:null, filter:{card:'',holder:'',cat:''}, imp:{step:'upload',card:'',rows:[],loading:false,error:''} };
+
+function save() { try { localStorage.setItem('tcs2627', JSON.stringify(S.txns)); } catch(e){} }
+function loadData() { try { const d=localStorage.getItem('tcs2627'); if(d) S.txns=JSON.parse(d); } catch(e){ S.txns=[]; } }
+function uid() { return Date.now().toString(36)+Math.random().toString(36).slice(2); }
+
+// ── Helpers ────────────────────────────────────────────────────────────────
+function fmt(n) { return '₹'+Math.round(n||0).toLocaleString('en-IN'); }
+function fmtMonth(d) {
+  if(!d) return '';
+  const p=d.slice(0,7).split('-');
+  return ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][parseInt(p[1])-1]+' '+p[0];
+}
+function curFYMonth() {
+  const n=new Date(); const s=`${n.getFullYear()}-${String(n.getMonth()+1).padStart(2,'0')}`;
+  return (s>='2026-04'&&s<='2027-03')?s:'2026-04';
+}
+function fmtFCY(a,c) { if(!a||c==='INR') return ''; return (+a).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})+' '+c; }
+function pct(n,t) { return t?Math.min(100,(n/t)*100):0; }
+function holderById(id) { return HOLDERS.find(h=>h.id===id)||{}; }
+function catById(id) { return CATS.find(c=>c.id===id)||{}; }
+function fillCls(p) { return p>=100?'fill-danger':p>=75?'fill-warn':'fill-safe'; }
+function runCls(v) { const p=(v/LIMIT)*100; return p>=100?'c-red':p>=75?'c-amber':'c-green'; }
+function esc(s) { return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+// ── Calculations ───────────────────────────────────────────────────────────
+function computeTotals() {
+  const el = S.txns.filter(t=>catById(t.cat).tcs);
+  const nl = S.txns.filter(t=>!catById(t.cat).tcs);
+  const totalEl = el.reduce((s,t)=>s+(t.amtINR||0),0);
+  const totalNl = nl.reduce((s,t)=>s+(t.amtINR||0),0);
+
+  const sorted = [...el].sort((a,b)=>a.date.localeCompare(b.date)||(a._c||0)-(b._c||0));
+  let run=0, tcs20=0, tcs2=0;
+  for(const t of sorted){
+    const prev=run; run+=t.amtINR||0;
+    if(run>LIMIT){
+      const over=run-Math.max(prev,LIMIT);
+      const cat=catById(t.cat);
+      if(cat.rate===0.20) tcs20+=over*0.20;
+      else if(cat.rate===0.02) tcs2+=over*0.02;
+    }
+  }
+  const p=pct(totalEl,LIMIT);
+  return { totalEl, totalNl, remaining:Math.max(0,LIMIT-totalEl), over:Math.max(0,totalEl-LIMIT),
+           tcsTotal:tcs20+tcs2, tcs20, tcs2, p };
+}
+
+function computeByHolder() {
+  const r={};
+  for(const h of HOLDERS){
+    const tx=S.txns.filter(t=>t.holder===h.id);
+    r[h.id]={
+      el:tx.filter(t=>catById(t.cat).tcs).reduce((s,t)=>s+(t.amtINR||0),0),
+      nl:tx.filter(t=>!catById(t.cat).tcs).reduce((s,t)=>s+(t.amtINR||0),0),
+      count:tx.length
+    };
+  }
+  return r;
+}
+
+function computeByCard() {
+  const r={};
+  for(const [cid] of Object.entries(CARDS)){
+    const tx=S.txns.filter(t=>holderById(t.holder).card===cid);
+    r[cid]={
+      el:tx.filter(t=>catById(t.cat).tcs).reduce((s,t)=>s+(t.amtINR||0),0),
+      nl:tx.filter(t=>!catById(t.cat).tcs).reduce((s,t)=>s+(t.amtINR||0),0),
+      count:tx.length
+    };
+  }
+  return r;
+}
+
+function computeByCat() {
+  const r={};
+  for(const c of CATS){
+    const tx=S.txns.filter(t=>t.cat===c.id);
+    r[c.id]={ total:tx.reduce((s,t)=>s+(t.amtINR||0),0), count:tx.length };
+  }
+  return r;
+}
+
+function getRunning() {
+  const sorted=[...S.txns].sort((a,b)=>a.date.localeCompare(b.date)||(a._c||0)-(b._c||0));
+  let run=0;
+  return sorted.map(t=>{
+    const tcs=catById(t.cat).tcs;
+    if(tcs) run+=t.amtINR||0;
+    return {...t, runEl:run, rem:Math.max(0,LIMIT-run)};
+  });
+}
+
+// ── Render ─────────────────────────────────────────────────────────────────
+function render() {
+  const tot=computeTotals();
+  const p=tot.p;
+  document.getElementById('app').innerHTML=`
+<div class="topbar">
+  <div class="topbar-row">
+    <span class="topbar-title">TCS Tracker</span>
+    <div class="row"><span class="fy-tag">${FY}</span><span class="fy-tag">Saahil Desai · Family</span></div>
+  </div>
+  <div class="limit-label">
+    <span style="color:#94a3b8">TCS Eligible: <strong style="color:#f1f5f9">${fmt(tot.totalEl)}</strong> of ₹10,00,000</span>
+    <span style="color:${p>=100?'#f87171':p>=75?'#fbbf24':'#4ade80'};font-weight:700">${p>=100?'⚠️ LIMIT EXCEEDED':fmt(tot.remaining)+' remaining'}</span>
+  </div>
+  <div class="limit-bar"><div class="limit-fill ${fillCls(p)}" style="width:${Math.min(100,p)}%"></div></div>
+  <div style="display:flex;justify-content:space-between;font-size:.65rem;color:#334155;margin-top:2px"><span>₹0</span><span>₹10,00,000</span></div>
+</div>
+<div class="tabs">
+  ${[['dashboard','Dashboard'],['add',S.editId?'Edit Txn':'Add Txn'],['holders','By Holder'],['cards','By Card'],['categories','By Category'],['transactions','All Transactions'],['import','Import Statement']].map(([id,lbl])=>
+    `<div class="tab ${S.tab===id?'active':''}" onclick="go('${id}')">${lbl}</div>`).join('')}
+</div>
+<div class="content">
+  ${S.tab==='dashboard'?renderDashboard(tot):''}
+  ${S.tab==='add'?renderForm():''}
+  ${S.tab==='holders'?renderHolders():''}
+  ${S.tab==='cards'?renderCards():''}
+  ${S.tab==='categories'?renderCategories():''}
+  ${S.tab==='transactions'?renderTxns():''}
+  ${S.tab==='import'?renderImport():''}
+</div>`;
+  if(S.tab==='add') initForm();
+}
+
+function renderDashboard(tot) {
+  const bh=computeByHolder();
+  const recent=getRunning().slice(-5).reverse();
+  let alert='';
+  if(tot.over>0) alert=`<div class="alert a-danger">⚠️ TCS threshold exceeded by <strong>${fmt(tot.over)}</strong>. Estimated TCS liability: <strong>${fmt(tot.tcsTotal)}</strong> (${fmt(tot.tcs20)} at 20% + ${fmt(tot.tcs2)} at 2%)</div>`;
+  else if(tot.p>=75) alert=`<div class="alert a-warn">⚡ Approaching limit — <strong>${fmt(tot.remaining)}</strong> left before TCS kicks in.</div>`;
+  else alert=`<div class="alert a-info">✓ Within TCS limit. <strong>${fmt(tot.remaining)}</strong> of ₹10,00,000 remaining this ${FY}.</div>`;
+
+  return `${alert}
+<div class="g4" style="margin-bottom:16px">
+  <div class="card">
+    <div class="card-title">TCS Eligible Spend</div>
+    <div class="stat ${tot.p>=100?'c-red':tot.p>=75?'c-amber':'c-green'}">${fmt(tot.totalEl)}</div>
+    <div class="stat-sub">${tot.p.toFixed(1)}% of ₹10L limit</div>
+  </div>
+  <div class="card">
+    <div class="card-title">Remaining Limit</div>
+    <div class="stat ${tot.remaining===0?'c-red':tot.remaining<250000?'c-amber':'c-green'}">${fmt(tot.remaining)}</div>
+    <div class="stat-sub">${tot.over>0?fmt(tot.over)+' over limit':'Before TCS threshold'}</div>
+  </div>
+  <div class="card">
+    <div class="card-title">Est. TCS Liability</div>
+    <div class="stat ${tot.tcsTotal>0?'c-red':'c-muted'}">${fmt(tot.tcsTotal)}</div>
+    <div class="stat-sub">${tot.tcsTotal>0?fmt(tot.tcs20)+' @20%, '+fmt(tot.tcs2)+' @2%':'No liability yet'}</div>
+  </div>
+  <div class="card">
+    <div class="card-title">Non-TCS Tracked</div>
+    <div class="stat c-blue">${fmt(tot.totalNl)}</div>
+    <div class="stat-sub">Abroad spends (not counted)</div>
+  </div>
+</div>
+
+<div class="sec">Cardholder Snapshot</div>
+${HOLDERS.map(h=>{
+  const d=bh[h.id]; if(!d.count&&!d.el) return '';
+  const hp=pct(d.el,LIMIT); const fc=hp>=100?'#f87171':hp>=75?'#fbbf24':'#4ade80';
+  return `<div class="hcard">
+    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:6px">
+      <div>
+        <span style="font-weight:700">${h.name}</span>
+        <span class="badge b-${h.card}" style="margin-left:6px">${CARDS[h.card]}</span>
+        <span class="badge b-pri" style="margin-left:4px">${h.role}</span>
+        <div style="font-size:.7rem;color:#64748b;margin-top:2px">${d.count} transaction${d.count!==1?'s':''}</div>
+      </div>
+      <div style="text-align:right">
+        <div style="font-weight:700;color:${fc}">${fmt(d.el)}</div>
+        ${d.nl>0?`<div style="font-size:.7rem;color:#64748b">${fmt(d.nl)} non-TCS</div>`:''}
+      </div>
+    </div>
+    <div class="pbar"><div class="pfill" style="width:${hp}%;background:${fc}"></div></div>
+    <div style="font-size:.67rem;color:#475569;margin-top:2px">${hp.toFixed(1)}% of master ₹10L limit</div>
+  </div>`;
+}).join('')}
+
+${recent.length?`<div class="sec">Recent Transactions</div>
+<div class="tw"><table>
+  <thead><tr><th>Date</th><th>Holder</th><th>Merchant</th><th>Amount</th><th>Category</th><th>TCS?</th><th>Running Total</th></tr></thead>
+  <tbody>${recent.map(t=>{
+    const h=holderById(t.holder); const cat=catById(t.cat);
+    return `<tr>
+      <td style="white-space:nowrap">${fmtMonth(t.date)}</td>
+      <td><div style="font-size:.82rem">${h.name||''}</div><div style="font-size:.68rem;color:#64748b">${CARDS[h.card]||''}</div></td>
+      <td style="font-size:.82rem">${esc(t.merchant)||'—'}</td>
+      <td><div class="mono">${fmt(t.amtINR)}</div>${t.amtFCY&&t.currency!=='INR'?`<div style="font-size:.7rem;color:#64748b">${fmtFCY(t.amtFCY,t.currency)}</div>`:''}</td>
+      <td style="font-size:.75rem">${cat.icon} ${cat.label||'—'}</td>
+      <td>${cat.tcs?'<span class="badge b-tcs">Yes</span>':'<span class="badge b-no">No</span>'}</td>
+      <td class="${runCls(t.runEl)} mono">${fmt(t.runEl)}</td>
+    </tr>`;
+  }).join('')}</tbody>
+</table></div>`:`<div class="empty">No transactions yet.<br><br><button class="btn btn-p" onclick="go('add')">Add first transaction →</button></div>`}`;
+}
+
+function renderForm() {
+  const e=S.editId?S.txns.find(t=>t.id===S.editId)||{}:{};
+  const eCard=e.holder?holderById(e.holder).card:'';
+  return `<div class="card" style="max-width:680px">
+  <div style="font-weight:700;font-size:.95rem;margin-bottom:16px">${S.editId?'Edit Transaction':'Add New Transaction'}</div>
+  <div class="fg">
+    <div><label>Month *</label>
+      <select id="f-date">
+        ${FY_MONTHS.map(m=>`<option value="${m.val}"${(e.date?e.date.slice(0,7):curFYMonth())===m.val?' selected':''}>${m.label}</option>`).join('')}
+      </select>
+    </div>
+    <div><label>Card *</label>
+      <select id="f-card" onchange="onCardChange()">
+        <option value="">— Select card —</option>
+        ${Object.entries(CARDS).map(([k,v])=>`<option value="${k}"${eCard===k?' selected':''}>${v}</option>`).join('')}
+      </select>
+    </div>
+    <div><label>Cardholder *</label>
+      <select id="f-holder">
+        <option value="">— Select cardholder —</option>
+        ${HOLDERS.filter(h=>!eCard||h.card===eCard).map(h=>`<option value="${h.id}"${e.holder===h.id?' selected':''}>${h.name} (${CARDS[h.card]}, ${h.role})</option>`).join('')}
+      </select>
+    </div>
+    <div><label>Merchant / Description *</label><input type="text" id="f-merch" value="${esc(e.merchant||'')}" placeholder="e.g. Marriott Dubai, Netflix, MakeMyTrip"/></div>
+    <div><label>Amount in INR *</label><input type="number" id="f-inr" value="${e.amtINR||''}" placeholder="e.g. 85000" min="0" step="0.01"/></div>
+    <div style="display:flex;gap:8px">
+      <div style="flex:1"><label>Amount in FCY</label><input type="number" id="f-fcy" value="${e.amtFCY||''}" placeholder="e.g. 1000" min="0" step="0.01"/></div>
+      <div style="width:88px"><label>Currency</label>
+        <select id="f-cur">${CCYS.map(c=>`<option value="${c}"${(e.currency||'USD')===c?' selected':''}>${c}</option>`).join('')}</select>
+      </div>
+    </div>
+    <div><label>Category *</label>
+      <select id="f-cat" onchange="onCatChange()">
+        <option value="">— Select category —</option>
+        <optgroup label="✔ Counts Towards TCS">${CATS.filter(c=>c.tcs).map(c=>`<option value="${c.id}"${e.cat===c.id?' selected':''}>${c.icon} ${c.label}</option>`).join('')}</optgroup>
+        <optgroup label="✗ Does NOT Count Towards TCS">${CATS.filter(c=>!c.tcs).map(c=>`<option value="${c.id}"${e.cat===c.id?' selected':''}>${c.icon} ${c.label}</option>`).join('')}</optgroup>
+      </select>
+    </div>
+    <div><label>Notes</label><input type="text" id="f-notes" value="${esc(e.notes||'')}" placeholder="Optional"/></div>
+  </div>
+  <div id="cat-info" style="margin:10px 0"></div>
+  <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:14px">
+    <button class="btn btn-s" onclick="saveTxn()">${S.editId?'Update Transaction':'Add Transaction'}</button>
+    ${S.editId?`<button class="btn btn-o" onclick="cancelEdit()">Cancel</button><button class="btn btn-d btn-sm" onclick="delTxn('${S.editId}')">Delete</button>`:''}
+  </div>
+</div>`;
+}
+
+function renderHolders() {
+  const bh=computeByHolder();
+  // Group by person name
+  const persons={};
+  for(const h of HOLDERS){
+    if(!persons[h.name]) persons[h.name]={el:0,nl:0,count:0,slots:[]};
+    const d=bh[h.id];
+    persons[h.name].el+=d.el; persons[h.name].nl+=d.nl; persons[h.name].count+=d.count;
+    if(d.el||d.nl||d.count) persons[h.name].slots.push({...h,...d});
+  }
+  return `<div class="sec">By Person (All Cards Combined)</div>
+${Object.entries(persons).map(([name,d])=>{
+  const hp=pct(d.el,LIMIT); const fc=hp>=100?'#f87171':hp>=75?'#fbbf24':'#4ade80';
+  return `<div class="card" style="margin-bottom:12px">
+    <div style="display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:8px">
+      <div>
+        <div style="font-weight:700;font-size:1rem">${name}</div>
+        <div style="font-size:.72rem;color:#64748b">${d.count} transaction${d.count!==1?'s':''} · ${[...new Set(d.slots.map(s=>CARDS[s.card]))].join(', ')||'No transactions'}</div>
+      </div>
+      <div style="text-align:right">
+        <div style="font-weight:700;font-size:1.1rem;color:${fc}">${fmt(d.el)}</div>
+        ${d.nl?`<div style="font-size:.7rem;color:#64748b">${fmt(d.nl)} non-TCS tracked</div>`:''}
+      </div>
+    </div>
+    <div style="height:7px;background:#0f172a;border-radius:4px;overflow:hidden">
+      <div style="width:${hp}%;height:100%;background:${fc};border-radius:4px;transition:width .4s"></div>
+    </div>
+    <div style="font-size:.68rem;color:#475569;margin-top:2px">${hp.toFixed(1)}% of master ₹10L</div>
+    ${d.slots.length?`<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px">
+      ${d.slots.map(s=>`<div style="background:#0f172a;border-radius:6px;padding:8px 12px;flex:1;min-width:130px">
+        <div style="font-size:.7rem;color:#64748b">${CARDS[s.card]} · ${s.role}</div>
+        <div style="font-weight:600;margin-top:2px">${fmt(s.el)}</div>
+        ${s.nl?`<div style="font-size:.68rem;color:#475569">${fmt(s.nl)} non-TCS</div>`:''}
+        <div style="font-size:.68rem;color:#334155">${s.count} txn${s.count!==1?'s':''}</div>
+      </div>`).join('')}
+    </div>`:''}
+  </div>`;}).join('')}
+
+<div class="sec">Per Card Slot</div>
+${HOLDERS.map(h=>{
+  const d=bh[h.id]; if(!d.count&&!d.el&&!d.nl) return '<div style="display:none"></div>';
+  const hp=pct(d.el,LIMIT); const fc=hp>=100?'#f87171':hp>=75?'#fbbf24':'#4ade80';
+  return `<div class="hcard" style="margin-bottom:8px">
+    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px">
+      <div class="row">
+        <span style="font-weight:600">${h.name}</span>
+        <span class="badge b-${h.card}">${CARDS[h.card]}</span>
+        <span class="badge b-pri">${h.role}</span>
+        <span style="font-size:.7rem;color:#475569">${d.count} txn${d.count!==1?'s':''}</span>
+      </div>
+      <div style="text-align:right">
+        <span style="font-weight:700;color:${fc}">${fmt(d.el)}</span>
+        ${d.nl?`<div style="font-size:.7rem;color:#64748b">${fmt(d.nl)} non-TCS</div>`:''}
+      </div>
+    </div>
+    <div class="pbar"><div class="pfill" style="width:${hp}%;background:${fc}"></div></div>
+  </div>`;}).join('')}`;
+}
+
+function renderCards() {
+  const bc=computeByCard(); const bh=computeByHolder();
+  return `<div class="g2" style="margin-bottom:16px">
+${Object.entries(CARDS).map(([cid,cname])=>{
+  const d=bc[cid]; const p=pct(d.el,LIMIT); const fc=p>=100?'#f87171':p>=75?'#fbbf24':'#4ade80';
+  return `<div class="card">
+    <div class="row" style="margin-bottom:12px">
+      <span style="font-weight:800;font-size:1rem">${cname}</span>
+      <span class="badge b-${cid}">${cid.toUpperCase()}</span>
+    </div>
+    <div class="card-title">TCS Eligible</div>
+    <div style="font-size:1.4rem;font-weight:800;color:${fc};margin-bottom:4px">${fmt(d.el)}</div>
+    <div style="height:6px;background:#0f172a;border-radius:3px;overflow:hidden;margin-bottom:3px">
+      <div style="width:${p}%;height:100%;background:${fc};border-radius:3px;transition:width .4s"></div>
+    </div>
+    <div style="font-size:.68rem;color:#64748b;margin-bottom:12px">${p.toFixed(1)}% of ₹10L</div>
+    <div style="display:flex;justify-content:space-between;font-size:.8rem;margin-bottom:4px">
+      <span class="c-muted">Non-TCS Tracked</span><span style="font-weight:600;color:#38bdf8">${fmt(d.nl)}</span>
+    </div>
+    <div style="display:flex;justify-content:space-between;font-size:.8rem">
+      <span class="c-muted">Transactions</span><span style="font-weight:600">${d.count}</span>
+    </div>
+    <div class="divider"></div>
+    <div style="font-size:.68rem;color:#64748b;margin-bottom:6px;text-transform:uppercase;letter-spacing:.05em">Cardholders</div>
+    ${HOLDERS.filter(h=>h.card===cid).map(h=>{
+      const hd=bh[h.id];
+      return `<div style="display:flex;justify-content:space-between;font-size:.8rem;padding:3px 0">
+        <span>${h.name} <span style="color:#475569;font-size:.72rem">(${h.role})</span></span>
+        <span style="font-weight:600">${fmt(hd.el)}</span>
+      </div>`;}).join('')}
+  </div>`;}).join('')}
+</div>`;
+}
+
+function renderCategories() {
+  const bc=computeByCat();
+  const tcsCats=CATS.filter(c=>c.tcs);
+  const nonCats=CATS.filter(c=>!c.tcs);
+  const maxT=Math.max(...tcsCats.map(c=>bc[c.id].total),1);
+  const maxN=Math.max(...nonCats.map(c=>bc[c.id].total),1);
+
+  return `<div class="card" style="margin-bottom:14px">
+  <div class="card-title">Counts Towards TCS Limit</div>
+  ${tcsCats.map(c=>{
+    const d=bc[c.id]; const p=pct(d.total,maxT);
+    const fc=c.rate===0.20?'#f87171':'#fbbf24';
+    return `<div class="cat-row">
+      <div style="display:flex;align-items:center;gap:10px;flex:1;min-width:0">
+        <span style="font-size:1.1rem">${c.icon}</span>
+        <div style="flex:1;min-width:0">
+          <div style="font-size:.83rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${c.label}</div>
+          <div style="display:flex;align-items:center;gap:6px;margin-top:2px">
+            <span class="badge ${c.rate===0.20?'b-20':'b-2'}">${(c.rate*100).toFixed(0)}% TCS</span>
+            <span style="font-size:.68rem;color:#64748b">${d.count} txn${d.count!==1?'s':''}</span>
+          </div>
+          <div style="height:3px;background:#1e293b;border-radius:2px;overflow:hidden;margin-top:4px">
+            <div style="width:${p}%;height:100%;background:${fc};border-radius:2px"></div>
+          </div>
+        </div>
+      </div>
+      <div style="text-align:right;margin-left:12px;min-width:90px">
+        <div style="font-weight:700;color:${d.total?fc:'#334155'}">${d.total?fmt(d.total):'—'}</div>
+        ${d.total>0?`<div style="font-size:.68rem;color:#64748b">~${fmt(d.total*c.rate)} TCS</div>`:''}
+      </div>
+    </div>`;}).join('')}
+</div>
+<div class="card">
+  <div class="card-title">Does NOT Count Towards TCS (Tracked for Reference)</div>
+  ${nonCats.map(c=>{
+    const d=bc[c.id]; const p=pct(d.total,maxN);
+    return `<div class="cat-row">
+      <div style="display:flex;align-items:center;gap:10px;flex:1;min-width:0">
+        <span style="font-size:1.1rem">${c.icon}</span>
+        <div style="flex:1;min-width:0">
+          <div style="font-size:.83rem">${c.label}</div>
+          <div style="font-size:.68rem;color:#64748b;margin-top:2px">${d.count} txn${d.count!==1?'s':''}</div>
+          <div style="height:3px;background:#1e293b;border-radius:2px;overflow:hidden;margin-top:4px">
+            <div style="width:${p}%;height:100%;background:#38bdf8;border-radius:2px"></div>
+          </div>
+        </div>
+      </div>
+      <div style="text-align:right;margin-left:12px;min-width:90px">
+        <div style="font-weight:700;color:${d.total?'#38bdf8':'#334155'}">${d.total?fmt(d.total):'—'}</div>
+      </div>
+    </div>`;}).join('')}
+</div>`;
+}
+
+function renderTxns() {
+  const all=getRunning().reverse();
+  const f=S.filter;
+  const filtered=all.filter(t=>{
+    const h=holderById(t.holder); const cat=catById(t.cat);
+    if(f.card&&h.card!==f.card) return false;
+    if(f.holder&&t.holder!==f.holder) return false;
+    if(f.cat==='tcs'&&!cat.tcs) return false;
+    if(f.cat==='non_tcs'&&cat.tcs) return false;
+    if(f.cat&&f.cat!=='tcs'&&f.cat!=='non_tcs'&&t.cat!==f.cat) return false;
+    return true;
+  });
+
+  return `<div class="filter-bar">
+  <select onchange="setF('card',this.value)">
+    <option value="">All Cards</option>
+    ${Object.entries(CARDS).map(([k,v])=>`<option value="${k}"${f.card===k?' selected':''}>${v}</option>`).join('')}
+  </select>
+  <select onchange="setF('holder',this.value)">
+    <option value="">All Holders</option>
+    ${HOLDERS.map(h=>`<option value="${h.id}"${f.holder===h.id?' selected':''}>${h.name} (${CARDS[h.card]})</option>`).join('')}
+  </select>
+  <select onchange="setF('cat',this.value)">
+    <option value="">All Categories</option>
+    <option value="tcs"${f.cat==='tcs'?' selected':''}>Counts Towards TCS</option>
+    <option value="non_tcs"${f.cat==='non_tcs'?' selected':''}>Non-TCS Only</option>
+    ${CATS.map(c=>`<option value="${c.id}"${f.cat===c.id?' selected':''}>${c.icon} ${c.label}</option>`).join('')}
+  </select>
+  <button class="btn btn-o btn-sm" onclick="exportCSV()">⬇ CSV</button>
+  <button class="btn btn-p btn-sm" onclick="go('add')">+ Add</button>
+</div>
+${filtered.length===0?`<div class="empty">No transactions${S.txns.length?` match filters`:''}.<br><br><button class="btn btn-p" onclick="go('add')">Add first transaction →</button></div>`:`
+<div style="font-size:.73rem;color:#64748b;margin-bottom:8px">${filtered.length} transaction${filtered.length!==1?'s':''}</div>
+<div class="tw"><table>
+  <thead><tr>
+    <th>Date</th><th>Card</th><th>Holder</th><th>Merchant</th>
+    <th>INR Amount</th><th>FCY Amount</th><th>Category</th>
+    <th>TCS?</th><th>Rate</th><th>Running TCS Total</th><th>Limit Left</th><th></th>
+  </tr></thead>
+  <tbody>${filtered.map(t=>{
+    const h=holderById(t.holder); const cat=catById(t.cat);
+    const remCls=t.rem===0?'c-red':t.rem<250000?'c-amber':'c-green';
+    return `<tr>
+      <td style="white-space:nowrap">${fmtMonth(t.date)}</td>
+      <td><span class="badge b-${h.card||''}">${h.card?CARDS[h.card]:'—'}</span></td>
+      <td style="font-size:.78rem;white-space:nowrap">${h.name||'—'}</td>
+      <td style="max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:.8rem" title="${esc(t.merchant||'')}">${esc(t.merchant)||'—'}</td>
+      <td class="mono">${fmt(t.amtINR)}</td>
+      <td style="font-size:.75rem;color:#94a3b8">${t.amtFCY&&t.currency!=='INR'?fmtFCY(t.amtFCY,t.currency):'—'}</td>
+      <td style="font-size:.75rem;white-space:nowrap">${cat.icon||''} ${cat.label||'—'}</td>
+      <td>${cat.tcs?'<span class="badge b-tcs">Yes</span>':'<span class="badge b-no">No</span>'}</td>
+      <td>${cat.tcs?`<span class="badge ${cat.rate===0.20?'b-20':'b-2'}">${(cat.rate*100).toFixed(0)}%</span>`:'—'}</td>
+      <td class="${runCls(t.runEl)} mono">${fmt(t.runEl)}</td>
+      <td class="${remCls} mono">${cat.tcs?fmt(t.rem):'—'}</td>
+      <td><button class="btn btn-o btn-sm" onclick="editTxn('${t.id}')">Edit</button></td>
+    </tr>`;}).join('')}
+  </tbody>
+</table></div>`}`;
+}
+
+// ── Handlers ───────────────────────────────────────────────────────────────
+function go(tab) { if(tab!=='add') S.editId=null; S.tab=tab; render(); }
+
+function initForm() {
+  const e=S.editId?S.txns.find(t=>t.id===S.editId):null;
+  if(e){
+    const h=holderById(e.holder);
+    const cs=document.getElementById('f-card'); if(cs&&h.card) cs.value=h.card;
+    onCardChange(false);
+    const hs=document.getElementById('f-holder'); if(hs) hs.value=e.holder;
+  }
+  const cs=document.getElementById('f-cat');
+  if(cs&&cs.value) onCatChange();
+}
+
+function onCardChange(reset=true) {
+  const card=document.getElementById('f-card').value;
+  const sel=document.getElementById('f-holder');
+  if(!sel) return;
+  const opts=HOLDERS.filter(h=>!card||h.card===card);
+  sel.innerHTML='<option value="">— Select cardholder —</option>'+
+    opts.map(h=>`<option value="${h.id}">${h.name} (${CARDS[h.card]}, ${h.role})</option>`).join('');
+}
+
+function onCatChange() {
+  const catId=document.getElementById('f-cat').value;
+  const cat=catById(catId);
+  const info=document.getElementById('cat-info');
+  if(!info) return;
+  if(!catId){ info.innerHTML=''; return; }
+  if(cat.tcs){
+    info.innerHTML=`<div class="alert ${cat.rate===0.20?'a-danger':'a-warn'}" style="font-size:.8rem">
+      ⚡ <strong>Counts towards TCS limit.</strong> Rate: <strong>${(cat.rate*100).toFixed(0)}%</strong> on spend over ₹10L threshold.
+    </div>`;
+  } else {
+    info.innerHTML=`<div class="alert" style="background:#0f172a;border:1px solid #334155;color:#64748b;font-size:.8rem">
+      ✓ <strong>Does NOT count towards TCS.</strong> Logged for reference only.
+    </div>`;
+  }
+}
+
+function saveTxn() {
+  const date=document.getElementById('f-date').value;
+  const holder=document.getElementById('f-holder').value;
+  const merch=(document.getElementById('f-merch').value||'').trim();
+  const amtINR=parseFloat(document.getElementById('f-inr').value)||0;
+  const amtFCY=parseFloat(document.getElementById('f-fcy').value)||null;
+  const currency=document.getElementById('f-cur').value;
+  const cat=document.getElementById('f-cat').value;
+  const notes=(document.getElementById('f-notes').value||'').trim();
+
+  if(!date||!holder||!merch||!amtINR||!cat){
+    alert('Please fill in all required fields: Date, Cardholder, Merchant, INR Amount, Category.');
+    return;
+  }
+  if(S.editId){
+    const i=S.txns.findIndex(t=>t.id===S.editId);
+    if(i>=0) S.txns[i]={...S.txns[i],date,holder,merchant:merch,amtINR,amtFCY,currency,cat,notes};
+    S.editId=null;
+  } else {
+    S.txns.push({id:uid(),_c:Date.now(),date,holder,merchant:merch,amtINR,amtFCY,currency,cat,notes});
+  }
+  save(); S.tab='dashboard'; render();
+}
+
+function editTxn(id) { S.editId=id; S.tab='add'; render(); }
+
+function delTxn(id) {
+  if(!confirm('Delete this transaction? This cannot be undone.')) return;
+  S.txns=S.txns.filter(t=>t.id!==id); S.editId=null; save(); S.tab='transactions'; render();
+}
+
+function cancelEdit() { S.editId=null; S.tab='transactions'; render(); }
+
+function setF(k,v) { S.filter[k]=v; render(); }
+
+function exportCSV() {
+  const rows=getRunning();
+  const hdr=['Month','Card','Holder','Role','Merchant','INR Amount','FCY Amount','Currency','Category','Counts TCS','TCS Rate %','Running TCS Total','Limit Remaining','Notes'];
+  const lines=[hdr.join(',')];
+  for(const t of rows){
+    const h=holderById(t.holder); const cat=catById(t.cat);
+    lines.push([
+      t.date, CARDS[h.card]||'', h.name||'', h.role||'',
+      '"'+(t.merchant||'').replace(/"/g,'""')+'"',
+      t.amtINR||0, t.amtFCY||'', t.currency||'',
+      '"'+(cat.label||'').replace(/"/g,'""')+'"',
+      cat.tcs?'Yes':'No',
+      cat.tcs?(cat.rate*100).toFixed(0):'0',
+      t.runEl||0, cat.tcs?t.rem||0:'',
+      '"'+(t.notes||'').replace(/"/g,'""')+'"'
+    ].join(','));
+  }
+  const blob=new Blob([lines.join('\n')],{type:'text/csv'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a'); a.href=url; a.download='tcs-tracker-fy2026-27.csv'; a.click();
+  URL.revokeObjectURL(url);
+}
+
+// ── Import: render ─────────────────────────────────────────────────────────
+
+function renderImport() {
+  if(S.imp.loading) return `
+<div style="text-align:center;padding:60px 20px">
+  <div style="margin-bottom:14px"><span class="spin"></span></div>
+  <div style="color:#94a3b8;font-size:.9rem">Parsing statement, please wait…</div>
+</div>`;
+  if(S.imp.step==='review') return renderReview();
+  return renderUpload();
+}
+
+function renderUpload() {
+  const imp=S.imp;
+  return `<div class="card" style="max-width:600px">
+  <div style="font-weight:700;font-size:.95rem;margin-bottom:3px">Import Statement</div>
+  <div style="font-size:.78rem;color:#64748b;margin-bottom:16px">Extract foreign transactions from an HDFC Infinia or Axis Atlas statement (PDF or CSV)</div>
+  ${imp.error?`<div class="alert a-danger" style="margin-bottom:14px">${imp.error}</div>`:''}
+  <div style="margin-bottom:12px">
+    <label>Card *</label>
+    <select id="imp-card">
+      <option value="">— Select card —</option>
+      ${Object.entries(CARDS).map(([k,v])=>`<option value="${k}"${imp.card===k?' selected':''}>${v}</option>`).join('')}
+    </select>
+  </div>
+  <div style="margin-bottom:16px">
+    <label>Statement File * <span style="color:#475569;font-size:.7rem">(PDF or CSV)</span></label>
+    <input type="file" id="imp-file" accept=".pdf,.csv" onchange="handleImpFile(this)"/>
+    <div style="font-size:.7rem;color:#334155;margin-top:4px">Your file is processed entirely in this browser — nothing is uploaded</div>
+  </div>
+  <div class="alert a-info" style="font-size:.77rem;line-height:1.6">
+    <strong>What gets extracted:</strong> Transactions with foreign currency (USD, EUR, AED, etc.),
+    INTL-marked charges, Indian travel aggregator bookings (MakeMyTrip, Cleartrip, Yatra, Ixigo…),
+    and foreign online subscriptions (Netflix, Spotify, Adobe…). Pure INR domestic transactions are skipped.<br><br>
+    <strong>Cardholder separation:</strong> The parser detects primary / supplementary card sections
+    in HDFC and Axis statements and assigns each transaction to the right holder. Review before importing.
+  </div>
+</div>`;
+}
+
+function renderReview() {
+  const rows=S.imp.rows;
+  const sel=rows.filter(r=>r.include);
+  const selEl=sel.filter(r=>catById(r.cat).tcs).reduce((s,r)=>s+(r.amtINR||0),0);
+  const selNl=sel.filter(r=>!catById(r.cat).tcs).reduce((s,r)=>s+(r.amtINR||0),0);
+  const hOpts=HOLDERS.filter(h=>h.card===S.imp.card);
+  return `
+<div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:12px">
+  <div class="row">
+    <button class="btn btn-o btn-sm" onclick="backToUpload()">← Back</button>
+    <span style="font-size:.88rem;font-weight:600">${rows.length} foreign transaction${rows.length!==1?'s':''} found in ${CARDS[S.imp.card]||''} statement</span>
+  </div>
+  <div class="row">
+    <button class="btn btn-o btn-sm" onclick="toggleAllRows(true)">Select All</button>
+    <button class="btn btn-o btn-sm" onclick="toggleAllRows(false)">Deselect All</button>
+    <button class="btn btn-s" onclick="confirmImport()" ${sel.length?'':'disabled style="opacity:.5;cursor:not-allowed"'}>
+      Import ${sel.length} transaction${sel.length!==1?'s':''}
+    </button>
+  </div>
+</div>
+<div class="alert a-info" style="font-size:.76rem;margin-bottom:10px">
+  <strong>${sel.length} selected</strong> — TCS eligible: <strong class="${selEl?'c-amber':'c-muted'}">${fmt(selEl)}</strong> · Non-TCS tracked: <strong class="c-blue">${fmt(selNl)}</strong>.
+  Adjust <em>Holder</em> or <em>Category</em> if auto-detection is off. Uncheck rows to skip. Categories drive TCS impact.
+</div>
+<div class="tw">
+<table>
+  <thead><tr>
+    <th style="width:28px">✓</th>
+    <th>Date</th><th>Holder</th><th>Merchant / Description</th>
+    <th>INR</th><th>FCY</th><th>Category</th><th>TCS?</th>
+  </tr></thead>
+  <tbody>
+  ${rows.map((r,i)=>{
+    const cat=catById(r.cat);
+    return `<tr class="${r.include?'':'rev-row-skip'}">
+      <td><input type="checkbox" ${r.include?'checked':''} onchange="toggleRow(${i},this.checked)"/></td>
+      <td style="white-space:nowrap;font-size:.78rem">${fmtMonth(r.date)}</td>
+      <td>
+        <select style="font-size:.72rem;padding:3px 5px;min-width:100px" onchange="updateRow(${i},'holder',this.value)">
+          ${hOpts.map(h=>`<option value="${h.id}"${r.holder===h.id?' selected':''}>${h.name}</option>`).join('')}
+        </select>
+      </td>
+      <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:.78rem" title="${esc(r.merchant)}">${esc(r.merchant)}</td>
+      <td class="mono" style="font-size:.8rem">${fmt(r.amtINR)}</td>
+      <td style="font-size:.72rem;color:#94a3b8;white-space:nowrap">${r.amtFCY&&r.currency!=='INR'?fmtFCY(r.amtFCY,r.currency):'—'}</td>
+      <td>
+        <select style="font-size:.68rem;padding:3px 5px;max-width:200px" onchange="updateRow(${i},'cat',this.value)">
+          <optgroup label="▲ Counts TCS">${CATS.filter(c=>c.tcs).map(c=>`<option value="${c.id}"${r.cat===c.id?' selected':''}>${c.icon} ${c.label}</option>`).join('')}</optgroup>
+          <optgroup label="▽ Non-TCS">${CATS.filter(c=>!c.tcs).map(c=>`<option value="${c.id}"${r.cat===c.id?' selected':''}>${c.icon} ${c.label}</option>`).join('')}</optgroup>
+        </select>
+      </td>
+      <td>${cat.tcs?'<span class="badge b-tcs">Yes</span>':'<span class="badge b-no">No</span>'}</td>
+    </tr>`;}).join('')}
+  </tbody>
+</table>
+</div>
+<div style="margin-top:14px">
+  <button class="btn btn-s" onclick="confirmImport()" ${sel.length?'':'disabled style="opacity:.5;cursor:not-allowed"'}>
+    Import ${sel.length} transaction${sel.length!==1?'s':''}
+  </button>
+</div>`;
+}
+
+// ── Import: file handling ──────────────────────────────────────────────────
+
+async function handleImpFile(input) {
+  const card=document.getElementById('imp-card').value;
+  if(!card){ S.imp.error='Please select a card first.'; render(); return; }
+  const file=input.files[0]; if(!file) return;
+  S.imp.card=card; S.imp.loading=true; S.imp.error=''; render();
+  try {
+    const ext=file.name.split('.').pop().toLowerCase();
+    if(ext==='pdf'){
+      if(typeof pdfjsLib==='undefined') throw new Error('PDF parser not loaded yet — wait a moment and retry, or use a CSV export instead');
+      await parsePDF(file,card);
+    } else {
+      await parseCSVFile(file,card);
+    }
+    if(!S.imp.rows.length){
+      S.imp.error='No foreign transactions detected. The statement format may not be supported — try the CSV export from your bank\'s net banking portal.';
+      S.imp.step='upload';
+    } else {
+      S.imp.step='review';
+    }
+  } catch(e) {
+    S.imp.error='Could not parse file: '+e.message+'. Try the CSV version of your statement.';
+    S.imp.step='upload';
+  }
+  S.imp.loading=false; render();
+}
+
+async function parsePDF(file,cardId) {
+  const buf=await file.arrayBuffer();
+  const pdf=await pdfjsLib.getDocument({data:buf,verbosity:0}).promise;
+  const allLines=[];
+  for(let pg=1;pg<=pdf.numPages;pg++){
+    const page=await pdf.getPage(pg);
+    const content=await page.getTextContent();
+    const byY={};
+    for(const item of content.items){
+      if(!item.str?.trim()) continue;
+      const y=Math.round(item.transform[5]/3)*3;
+      if(!byY[y]) byY[y]=[];
+      byY[y].push({x:item.transform[4],text:item.str});
+    }
+    Object.entries(byY)
+      .sort((a,b)=>+b[0]-+a[0])
+      .forEach(([,items])=>{
+        const line=items.sort((a,b)=>a.x-b.x).map(i=>i.text).join(' ').replace(/\s{2,}/g,' ').trim();
+        if(line) allLines.push(line);
+      });
+  }
+  S.imp.rows=extractTxnsFromLines(allLines,cardId);
+}
+
+async function parseCSVFile(file,cardId) {
+  const text=await file.text();
+  const lines=text.split(/\r?\n/).map(l=>l.trim()).filter(Boolean);
+  S.imp.rows=extractTxnsFromCSV(lines,cardId);
+}
+
+// ── Import: parsing logic ──────────────────────────────────────────────────
+
+const IMP_FCY_RE=/\b(USD|EUR|GBP|AED|SGD|THB|JPY|CHF|AUD|CAD|HKD|MYR|IDR|NZD|ZAR|SEK|NOK|DKK|BHD|QAR|KWD|OMR|SAR)\s*([\d,]+\.?\d*)/i;
+const IMP_DATE_RE=/\b(\d{2}[\/\-]\d{2}[\/\-]\d{2,4}|\d{1,2}[\s\-](?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[\s\-]\d{4})\b/i;
+const IMP_INR_RE=/([\d,]{2,}\.?\d{0,2})\s*(?:Dr|Cr|DB|CR)?\s*$/i;
+const IMP_INTL_RE=/\b(INTL|INTERNATIONAL|FOREIGN)\b/i;
+const IMP_TRAVEL_AGGS=/MAKEMYTRIP|CLEARTRIP|YATRA\b|IXIGO|EASEMYTRIP|GOIBIBO|MMT\b|THOMAS\s*COOK|COX\s*AND\s*KINGS|VEENA\s*WORLD|VIA\.COM|TRAVELJOCKEY/i;
+const IMP_ONLINE_SUBS=/NETFLIX|SPOTIFY|AMAZON\s*PRIME|APPLE\s*STORE|APPLE\.COM\/BILL|GOOGLE\s*PLAY|MICROSOFT|ADOBE|DROPBOX|ZOOM\b|SLACK\b|GITHUB|OPENAI|CHATGPT|META\s*QUEST|LINKEDIN|DISNEY\+|HOTSTAR|EXPEDIA|BOOKING\.COM|BOOKING\s*COM|AIRBNB|AGODA|HOTELS\.COM/i;
+const IMP_HOTEL_RE=/\bHOTEL\b|RESORT\b|MARRIOTT|HILTON|HYATT|SHERATON|WESTIN|RITZ\s*CARLTON|FOUR\s*SEASONS|ACCOR|RADISSON|NOVOTEL|SOFITEL|IBIS|HOLIDAY\s*INN|CROWNE\s*PLAZA|INTERCONTINENTAL/i;
+const IMP_FLIGHT_RE=/AIRLINE|AIRWAYS|EMIRATES|ETIHAD|LUFTHANSA|BRITISH\s*AIR|SINGAPORE\s*AIR|AIR\s*FRANCE|KLM\b|QATAR\s*AIR|UNITED\s*AIRLINES|DELTA\b|AMERICAN\s*AIR|CATHAY|FLYDUBAI|INDIGO\b|SPICEJET|VISTARA|AIR\s*INDIA/i;
+
+function detectHolderSection(line,cardId) {
+  const up=line.toUpperCase();
+  for(const h of HOLDERS){
+    if(h.card!==cardId) continue;
+    const nm=h.name.toUpperCase();
+    // Section header: name + card/supplementary/primary/member keyword
+    if(up.includes(nm)&&/CARD|SUPPLEMENTARY|PRIMARY|MEMBER|HOLDER|ADD.ON|ADDON/i.test(up)) return h.id;
+    // Standalone name line (no date, no amount)
+    if(up.trim()===nm&&!IMP_DATE_RE.test(line)&&!IMP_FCY_RE.test(line)) return h.id;
+  }
+  return null;
+}
+
+function classifyForImport(text,hasFCY) {
+  const T=text.toUpperCase();
+  if(IMP_TRAVEL_AGGS.test(T)){
+    return IMP_HOTEL_RE.test(T)?'hotel_agg':'flight_agg';
+  }
+  if(IMP_ONLINE_SUBS.test(T)){
+    if(/BOOKING\.COM|BOOKING\s*COM|AIRBNB|AGODA|HOTELS/.test(T)) return 'hotel_agg';
+    return 'sub_foreign';
+  }
+  if(hasFCY){
+    if(/POS\s*ABROAD|OFFLINE\s*INTL|INTL\s*POS/.test(T)) return 'swipe_abroad';
+    if(IMP_FLIGHT_RE.test(T)) return 'swipe_abroad';
+    if(IMP_HOTEL_RE.test(T)) return 'swipe_abroad';
+    return 'fm_fcy';
+  }
+  if(IMP_INTL_RE.test(T)) return 'fm_inr';
+  return 'fm_fcy';
+}
+
+function impParseDate(s) {
+  if(!s) return '';
+  s=s.trim();
+  let m=s.match(/^(\d{2})[\/\-](\d{2})[\/\-](\d{4})$/);
+  if(m) return `${m[3]}-${m[2]}-${m[1]}`;
+  m=s.match(/^(\d{2})[\/\-](\d{2})[\/\-](\d{2})$/);
+  if(m) return `20${m[3]}-${m[2]}-${m[1]}`;
+  m=s.match(/^(\d{1,2})[\s\-](Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[\s\-](\d{4})$/i);
+  if(m){
+    const mo={Jan:'01',Feb:'02',Mar:'03',Apr:'04',May:'05',Jun:'06',Jul:'07',Aug:'08',Sep:'09',Oct:'10',Nov:'11',Dec:'12'};
+    return `${m[3]}-${mo[m[2]]}-${m[1].padStart(2,'0')}`;
+  }
+  return '';
+}
+
+function impCleanMerchant(text,dateStr,fcyStr,inrStr) {
+  let t=text;
+  if(dateStr) t=t.replace(dateStr,'');
+  if(fcyStr) t=t.replace(fcyStr,'').replace(/@\s*[\d.]+/g,'');
+  if(inrStr) t=t.replace(inrStr,'');
+  return t.replace(/\b(Dr|Cr|DB|CR)\b/gi,'')
+    .replace(/Conversion\s*Rate\s*:?\s*[\d.]+/gi,'')
+    .replace(/\s{2,}/g,' ').trim().slice(0,130);
+}
+
+function impCSVLine(line) {
+  const cols=[];let cur='';let inQ=false;
+  for(let i=0;i<line.length;i++){
+    const c=line[i];
+    if(c==='"'){if(inQ&&line[i+1]==='"'){cur+='"';i++;}else inQ=!inQ;}
+    else if(c===','&&!inQ){cols.push(cur);cur='';}
+    else cur+=c;
+  }
+  cols.push(cur);
+  return cols.map(c=>c.trim().replace(/^"|"$/g,''));
+}
+
+function impFindCol(header,candidates) {
+  for(const c of candidates){const i=header.findIndex(h=>h.includes(c));if(i>=0)return i;}
+  return -1;
+}
+
+function extractTxnsFromLines(lines,cardId) {
+  const txns=[];
+  const primary=HOLDERS.find(h=>h.card===cardId&&h.role==='Primary');
+  let curHolder=primary?primary.id:HOLDERS.find(h=>h.card===cardId)?.id;
+  let i=0;
+  while(i<lines.length){
+    const line=lines[i];
+    const hs=detectHolderSection(line,cardId);
+    if(hs){curHolder=hs;i++;continue;}
+    const dm=line.match(IMP_DATE_RE);
+    if(dm&&dm.index<25){
+      // Collect up to 5 continuation lines
+      const block=[line];
+      for(let j=i+1;j<Math.min(i+6,lines.length);j++){
+        const nl=lines[j];
+        if(nl.match(IMP_DATE_RE)?.[0]&&lines[j].indexOf(nl.match(IMP_DATE_RE)[0])<25) break;
+        if(detectHolderSection(nl,cardId)) break;
+        block.push(nl);
+      }
+      i+=block.length;
+      const full=block.join(' ');
+      const fcym=full.match(IMP_FCY_RE);
+      const inrm=full.match(IMP_INR_RE);
+      const hasINTL=IMP_INTL_RE.test(full);
+      const isForeign=fcym||hasINTL||IMP_TRAVEL_AGGS.test(full)||IMP_ONLINE_SUBS.test(full);
+      if(!isForeign||!inrm) continue;
+      const amtINR=parseFloat(inrm[1].replace(/,/g,''))||0;
+      if(amtINR<10) continue;
+      if(amtINR<300&&/\bfee\b|\bgst\b|\btax\b|\bcharge\b/i.test(full)) continue;
+      const dateStr=impParseDate(dm[1]);
+      if(!dateStr) continue;
+      const amtFCY=fcym?parseFloat(fcym[2].replace(/,/g,'')):null;
+      const currency=fcym?fcym[1].toUpperCase():'INR';
+      const cat=classifyForImport(full,!!fcym);
+      const merchant=impCleanMerchant(full,dm[1],fcym?fcym[0]:null,inrm[0]);
+      txns.push({date:dateStr.slice(0,7),holder:curHolder,merchant,amtINR,amtFCY,currency,cat,notes:'',include:true});
+    } else { i++; }
+  }
+  return txns;
+}
+
+function extractTxnsFromCSV(lines,cardId) {
+  if(lines.length<2) return [];
+  const header=impCSVLine(lines[0]).map(h=>h.toUpperCase().trim());
+  const dCol=impFindCol(header,['TRANSACTION DATE','DATE','TXN DATE','POSTING DATE']);
+  const nCol=impFindCol(header,['NARRATION','DESCRIPTION','TRANSACTION DETAILS','DETAILS','PARTICULARS','MERCHANT']);
+  const aCol=impFindCol(header,['DEBIT AMOUNT','DEBIT','WITHDRAWAL AMT','DR AMOUNT','AMOUNT']);
+  if(dCol<0||nCol<0||aCol<0) throw new Error(
+    `Could not identify required columns. Found: ${header.slice(0,8).join(', ')}. Expected Date, Description/Narration, and Debit/Amount columns.`);
+  const primary=HOLDERS.find(h=>h.card===cardId&&h.role==='Primary');
+  let curHolder=primary?primary.id:HOLDERS.find(h=>h.card===cardId)?.id;
+  const txns=[];
+  for(let i=1;i<lines.length;i++){
+    const cols=impCSVLine(lines[i]);
+    if(cols.length<=Math.max(dCol,nCol,aCol)) continue;
+    const rawDate=cols[dCol]?.trim();
+    const desc=(cols[nCol]?.trim())||'';
+    const amtINR=parseFloat((cols[aCol]||'').replace(/[,₹\s]/g,''))||0;
+    if(!rawDate||!desc||!amtINR) continue;
+    const hs=detectHolderSection(desc,cardId);
+    if(hs){curHolder=hs;continue;}
+    const dateStr=impParseDate(rawDate);
+    if(!dateStr) continue;
+    const fcym=desc.match(IMP_FCY_RE);
+    const hasINTL=IMP_INTL_RE.test(desc);
+    const isForeign=fcym||hasINTL||IMP_TRAVEL_AGGS.test(desc)||IMP_ONLINE_SUBS.test(desc);
+    if(!isForeign) continue;
+    if(amtINR<10) continue;
+    if(amtINR<300&&/\bfee\b|\bgst\b|\btax\b|\bcharge\b/i.test(desc)) continue;
+    const amtFCY=fcym?parseFloat(fcym[2].replace(/,/g,'')):null;
+    const currency=fcym?fcym[1].toUpperCase():'INR';
+    const cat=classifyForImport(desc,!!fcym);
+    const merchant=desc.replace(IMP_FCY_RE,'').replace(/@\s*[\d.]+/g,'').replace(/\s{2,}/g,' ').trim().slice(0,130);
+    txns.push({date:dateStr,holder:curHolder,merchant,amtINR,amtFCY,currency,cat,notes:'',include:true});
+  }
+  return txns;
+}
+
+// ── Import: handlers ───────────────────────────────────────────────────────
+
+function toggleRow(i,v){S.imp.rows[i].include=v;render();}
+function toggleAllRows(v){S.imp.rows.forEach(r=>r.include=v);render();}
+function updateRow(i,f,v){S.imp.rows[i][f]=v;render();}
+function backToUpload(){S.imp={step:'upload',card:S.imp.card,rows:[],loading:false,error:''};render();}
+function confirmImport(){
+  const toAdd=S.imp.rows.filter(r=>r.include);
+  for(const r of toAdd){
+    S.txns.push({id:uid(),_c:Date.now(),date:r.date,holder:r.holder,merchant:r.merchant,
+      amtINR:r.amtINR,amtFCY:r.amtFCY||null,currency:r.currency,cat:r.cat,notes:r.notes||''});
+  }
+  save();
+  S.imp={step:'upload',card:'',rows:[],loading:false,error:''};
+  S.tab='dashboard';
+  render();
+}
+
+// ── Init ───────────────────────────────────────────────────────────────────
+loadData(); render();
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js" crossorigin="anonymous"></script>
+<script>
+if(typeof pdfjsLib!=='undefined'){
+  pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+}
+</script>
+</body>
+</html>
